@@ -14,6 +14,10 @@
 #define TAM_NOME 64
 #define TAM_USER 16
 
+#define ERROR "/ERROR\n"
+#define FECHAR_CLIENTE "/QUIT\n"
+#define FECHAR_SERVIDOR "/SEVERKILL\n"
+
 
 #define CODIGO_REGISTRO '#'
 
@@ -23,21 +27,100 @@ typedef struct {
     int moderador;
 } InfoCliente;
 
+
+InfoCliente cliente;
+
 int socket_c;
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-void* enviar();
-void* receber();
-
 char bufferEnviar[TAM_MSG];
 char bufferReceber[TAM_MSG];
+
+int fechar = 0; 
+
+void* enviar() {
+    while (!fechar) {
+        // Zera buffer para enviar nova mensagem
+        bzero(bufferEnviar, TAM_MSG);
+
+        // Recebe do usuário a mensagem a ser enviada para o servidor
+        while(fgets(bufferEnviar, TAM_MSG, stdin) == NULL){}
+
+        // Enviando mensagem para servidor utilizando o socket
+        if(send(socket_c, bufferEnviar, strlen(bufferEnviar), 0) == -1) {
+            // Se não conseguiu enviar...
+
+            // Printa erro de envio
+            perror("\x1B[31msend\x1B[39m"); 
+
+            // Muda variável de thread para fechar servidor
+            pthread_mutex_lock(&mutex); 
+                fechar = 1;
+            pthread_mutex_unlock(&mutex);
+        } else if((strcmp(bufferEnviar, FECHAR_CLIENTE) == 0) || (strcmp(bufferEnviar, FECHAR_SERVIDOR) == 0)) {
+            // Se o que enviou foi um código de saída...
+            
+            // Printa que está saindo
+            printf("\x1B[31mSaindo...\n\x1B[39m");
+
+            // Muda variável de thread para fechar servidor
+            pthread_mutex_lock(&mutex);
+                fechar = 1;
+            pthread_mutex_unlock(&mutex);
+        }
+    }
+
+    // Fecha thread
+    pthread_exit(NULL);
+}
+
+void* receber() {
+    int mensagem_tam;
+    while (!fechar) {
+        bzero(bufferReceber, TAM_MSG);
+
+        // Recebe mensagens do servidor
+        if((mensagem_tam = recv(socket_c, bufferReceber, TAM_MSG - 1, 0)) == -1) {
+            // Se não foi possível receber...
+
+            // Printa erro de recebimento
+            perror("\x1B[31msend\x1B[39m");
+
+            // Muda variável de thread para fechar servidor
+            pthread_mutex_lock(&mutex);
+                fechar = 1;
+            pthread_mutex_unlock(&mutex);
+        } else {
+            // Garante que a mensagem tem o '\0'
+            bufferReceber[mensagem_tam] = '\0';
+
+            // Verifica se não foi uma mensagem de erro do servidor
+            //****************MUDAR ESSA MACRO DE ERRO*******************
+            // ERRO DE USUÁRIO JÁ UTILIZADO
+            if(strcmp(ERROR, bufferReceber) == 0) {
+                // Se usuário já estiver sendo utilizado...
+
+                // Printa aviso de usuário já utilizado
+                printf("\x1B[31Error:\x1B[39m O usuário %s já está sendo utlizado, mude para conectar.\n", cliente.nome);
+                
+                // Muda variável de thread para fechar servidor
+                pthread_mutex_lock(&mutex);
+                fechar = 1;
+                pthread_mutex_unlock(&mutex);
+            } else {
+                printf("%s", bufferReceber);
+            }
+        }
+    }
+
+    // Fecha thread
+    pthread_exit(NULL);
+}
 
 int main(){
     bzero(bufferEnviar, TAM_MSG);
     bzero(bufferReceber, TAM_MSG);
-
-    InfoCliente cliente;
 
     char usr_envia[TAM_NOME + TAM_USER + 1];
     
@@ -110,5 +193,21 @@ int main(){
         exit(EXIT_FAILURE);
     }
 
+    pthread_t thread_envia, thread_recebe;
+    pthread_attr_t confg_thread;
+
+    pthread_attr_init(&confg_thread);
+    pthread_attr_setdetachstate(&confg_thread, PTHREAD_CREATE_JOINABLE);
+
+
+    pthread_create(&thread_envia, &confg_thread, enviar, NULL);
+    pthread_create(&thread_recebe, &confg_thread, receber, NULL);
+
+    pthread_join(thread_envia, NULL);
+    pthread_join(thread_recebe, NULL);
+
+    pthread_mutex_destroy(&mutex);
+
+    close(socket_c);
     return 0;
 }
