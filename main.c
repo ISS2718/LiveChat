@@ -45,7 +45,7 @@ void* enviar() {
         bzero(bufferEnviar, TAM_MSG);
 
         // Recebe do usuário a mensagem a ser enviada para o servidor
-        while(fgets(bufferEnviar, TAM_MSG, stdin) == NULL){}
+        while(fgets(bufferEnviar, TAM_MSG, stdin) == NULL);
 
         // Enviando mensagem para servidor utilizando o socket
         if(send(socket_c, bufferEnviar, strlen(bufferEnviar), 0) == -1) {
@@ -129,7 +129,7 @@ int main(){
 
     // pegando informações do usuário
     printf("\x1B[33mDigite seu nome:\x1B[39m \n");
-    while(!scanf("%s", cliente.nome)) {
+    while(fgets(cliente.nome, TAM_NOME, stdin) == NULL){
         printf("\x1B[31mERRO:\x1B[39m Digite novamente o seu nome\n");
     }
     
@@ -137,7 +137,7 @@ int main(){
     strcat(usr_envia, cliente.nome);
 
     printf("\x1B[33mDigite seu usuário:\x1B[39m \n");
-    while(!scanf("%s", cliente.user)) {
+    while(fgets(cliente.user, TAM_USER, stdin) == NULL){
         printf("\x1B[31mERRO:\x1B[39m Digite novamente o seu usuário\n");
     }
 
