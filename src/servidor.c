@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "config.h"
 #include "msg.h"
@@ -26,6 +27,9 @@ int rSocket;
 InfoCliente criaRegistroCliente(char * infoGeral);
 int clienteConectado(struct sockaddr_in endCliente, Cliente listaClientes);
 int conectarCliente(struct sockaddr_in endCliente, InfoCliente registro, Cliente listaClientes);
+int clientesIguais(struct sockaddr_in A, struct sockaddr_in B);
+void enviaMensagemTodos(char mensagem[TAM_MSG], struct sockaddr_in mensageiro, Cliente listaClientes);
+InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, Cliente listaClientes);
 
 int main(){
     struct sockaddr_in endServidor;
@@ -39,6 +43,8 @@ int main(){
         return -1;
     }
 
+    printf("Socket criado!\n");
+
     endServidor.sin_family = AF_INET;
     endServidor.sin_port = htons(PORTA);
     endServidor.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -50,22 +56,47 @@ int main(){
         return -1;
     }
 
+    char ip[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &endServidor,ip,INET_ADDRSTRLEN);
+    printf("Socket esta online no IP %s e na porta %d!\n", ip, ntohs(endServidor.sin_port));
+
     while(1){
         char mensagem[TAM_MSG];
-        int bytesRecebidos = recvfrom(rSocket,mensagem, TAM_MSG-1,0,(struct sockaddr *) &endMensageiro, (unsigned int *) sizeof(struct sockaddr_in));
+        int tamanhoEndereco = sizeof(struct sockaddr_in);
+        int bytesRecebidos = recvfrom(rSocket,mensagem, TAM_MSG-1,0,(struct sockaddr *) &endMensageiro, (unsigned int *) &tamanhoEndereco);
         
         if(bytesRecebidos == -1){
             fprintf(stderr, "Erro ao receber mensagem.");
             return -1;
         }
 
+        //Se o cliente não está conectado, as mensagens que chegam são informações do usuário para conectá-lo.
         if(!clienteConectado(endMensageiro, listaClientes)){
             InfoCliente infoCliente = criaRegistroCliente(mensagem);
             if(conectarCliente(endMensageiro, infoCliente, listaClientes)){
-                printf("User conectado!\n");
-                //MANDAR MENSAGEM DE VOLTA DIZENDO QUE FOI CONECTADO.
-            }
+                printf("User %s conectado!\n", infoCliente.user);
+
+                char statusCliente[TAM_MSG];
+                strcat(statusCliente, infoCliente.user);
+                strcat(statusCliente, " esta conectado!");
+                strcat(statusCliente, "\0");
                 
+                enviaMensagemTodos(statusCliente, endMensageiro, listaClientes);
+            }
+        }
+        else{
+            InfoCliente registroMensageiro = retornaRegistroPorEndereco(endMensageiro, listaClientes);
+            
+            char mensagemCompleta[TAM_MSG];
+            strcat(mensagemCompleta, registroMensageiro.nome);
+            strcat(mensagemCompleta, "(");
+            strcat(mensagemCompleta, registroMensageiro.user);
+            strcat(mensagemCompleta, "): ");
+            strcat(mensagemCompleta, mensagem);
+            strcat(mensagemCompleta, "\n\0");
+
+            printf("%s", mensagemCompleta);
+            enviaMensagemTodos(mensagemCompleta,endMensageiro, listaClientes);
         }
 
     }
@@ -105,20 +136,28 @@ int conectarCliente(struct sockaddr_in endCliente, InfoCliente registro, Cliente
 
 int clienteConectado(struct sockaddr_in endCliente, Cliente listaClientes){
     Cliente * cliente = &listaClientes;
-    struct sockaddr_in endClienteLista = cliente->endereco;
-
+    
     while(cliente != NULL){
-        int bEndereco = strncmp((char *) &endCliente.sin_addr.s_addr, (char *) &endClienteLista.sin_addr.s_addr, sizeof(unsigned long));
-
-        int bPorta = strncmp((char *) &endCliente.sin_port, (char *) &endClienteLista.sin_port, sizeof(unsigned short));
-
-        int bFamilia = strncmp((char *) &endCliente.sin_family, (char *) &endClienteLista.sin_family, sizeof(unsigned short));
-
-        if(bEndereco == 0 && bPorta == 0 && bFamilia == 0)
+        struct sockaddr_in endClienteLista = cliente->endereco;
+        int bClientesIguais = clientesIguais(endCliente, endClienteLista);
+        if(bClientesIguais)
             return 1;
-        
-        return 0;
+        cliente = cliente->proximo;
     }
+    return 0;
+}
+
+int clientesIguais(struct sockaddr_in A, struct sockaddr_in B){
+    int bEndereco = strncmp((char *) &A.sin_addr.s_addr, (char *) &B.sin_addr.s_addr, sizeof(unsigned long));
+
+    int bPorta = strncmp((char *) &A.sin_port, (char *) &B.sin_port, sizeof(unsigned short));
+
+    int bFamilia = strncmp((char *) &A.sin_family, (char *) &B.sin_family, sizeof(unsigned short));
+
+    if(bEndereco == 0 && bPorta == 0 && bFamilia == 0)
+        return 1;
+    
+    return 0;
 }
 
 InfoCliente criaRegistroCliente(char * infoGeral){
@@ -151,4 +190,44 @@ InfoCliente criaRegistroCliente(char * infoGeral){
 
     return infoCliente;
 
+}
+
+void enviaMensagemTodos(char mensagem[TAM_MSG], struct sockaddr_in mensageiro, Cliente listaClientes){
+    Cliente * cliente = &listaClientes;
+    
+    while(cliente != NULL){
+        int bClientesIguais = clientesIguais(mensageiro,cliente->endereco);
+        if(!bClientesIguais){
+            int ret = sendto(rSocket, mensagem, strlen(mensagem),0, (struct sockaddr *)&cliente->endereco, sizeof(struct sockaddr));
+            
+            if(ret == -1){
+                fprintf(stderr, "%s (%s): ", cliente->registro.nome, cliente->registro.user);
+                fprintf(stderr, ERRO_MENSAGEM);
+                return;
+            }
+        }
+        cliente = cliente->proximo;
+    }
+}
+
+InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, Cliente listaClientes){
+    InfoCliente infoCliente;
+    strcat(infoCliente.nome, "\0");
+    strcat(infoCliente.user, "\0");
+    infoCliente.moderador = -1;
+    
+    Cliente * cliente = &listaClientes;
+    while(cliente!=NULL){
+        struct sockaddr_in endClienteLista = cliente->endereco;
+        int bClientesIguais = clientesIguais(endCliente, endClienteLista);
+        if(bClientesIguais){
+            infoCliente = cliente->registro;
+            return infoCliente;
+        }
+            
+        cliente = cliente->proximo;
+    }
+
+    printf(CLIENTE_NAO_ENCONTRADO);
+    return infoCliente;
 }
