@@ -7,13 +7,11 @@ OBJDIR := $(OUTDIR)/obj
 COMMON_FLAGS := -march=native -O3
 
 ifeq ($(OS), Windows_NT)
-	CFLAGS := -lglfw3.dll -lglew32 -lopengl32
 	OUTFILE := $(OUTFILE)_win
 	OBJ_EXT := win.o
 else
 	UNAME := $(shell uname)
 	ifeq ($(UNAME), Linux)
-		CFLAGS := -lglfw -lGLEW -lGL -lm
 		OUTFILE := $(OUTFILE)_linux.out
 		OBJ_EXT := linux.o
 	endif
@@ -22,8 +20,8 @@ endif
 # Flags de depuração
 DBFLAGS := -Wall -g3
 
-SRCS := $(wildcard *.cpp)
-OBJS := $(patsubst %.cpp,$(OBJDIR)/%.$(OBJ_EXT),$(SRCS))
+SRCS := $(wildcard *.c)
+OBJS := $(patsubst %.c,$(OBJDIR)/%.$(OBJ_EXT),$(SRCS))
 
 run: $(OUTDIR)/$(OUTFILE)
 	$(OUTDIR)/$(OUTFILE)
@@ -44,7 +42,7 @@ $(OUTDIR):
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
-$(OBJDIR)/%.$(OBJ_EXT): %.cpp
+$(OBJDIR)/%.$(OBJ_EXT): %.c
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 $(OUTDIR)/$(OUTFILE): $(OBJS)
