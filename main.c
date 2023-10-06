@@ -118,6 +118,11 @@ void* receber() {
     pthread_exit(NULL);
 }
 
+void tirabarran(char* msg) {
+    int msg_tam = (int) strlen(msg);
+    msg[msg_tam-1] = '\0';
+}
+
 int main(){
     bzero(bufferEnviar, TAM_MSG);
     bzero(bufferReceber, TAM_MSG);
@@ -133,6 +138,7 @@ int main(){
         printf("\x1B[31mERRO:\x1B[39m Digite novamente o seu nome\n");
     }
     
+    tirabarran(cliente.nome);
     strcat(usr_envia, "#");
     strcat(usr_envia, cliente.nome);
 
@@ -141,6 +147,7 @@ int main(){
         printf("\x1B[31mERRO:\x1B[39m Digite novamente o seu usuário\n");
     }
 
+    tirabarran(cliente.user);
     strcat(usr_envia, "#");
     strcat(usr_envia, cliente.user);
 
