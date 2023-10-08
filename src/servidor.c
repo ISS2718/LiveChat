@@ -273,3 +273,44 @@ InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, Cliente * 
     printf(CLIENTE_NAO_ENCONTRADO);
     return infoCliente;
 }
+
+int removeCliente(struct sockaddr_in endCliente, Cliente * listaClientes){
+    Cliente * cliente_anterior = NULL
+    Cliente * cliente_atual = listaClientes;
+    Cliente * cliente_sucessor = cliente_atual->proximo;
+    
+    while(cliente != NULL){
+        printf(SISTEMA);
+        printf("Buscando cliente: %s.\n", cliente->registro.user);
+        struct sockaddr_in endClienteLista = cliente->endereco;
+        int bClientesIguais = clientesIguais(endCliente, endClienteLista);
+        if(bClientesIguais){
+            Cliente * remover = cliente_atual;
+            if(cliente_anterior == NULL) {
+                if(cliente_sucessor == NULL) {
+                    free(listaClientes);
+                    listaClientes == NULL
+                } else {
+                    cliente_atual->endereco = cliente_sucessor->endereco;
+                    cliente_atual->registro = cliente_sucessor->registro;
+                    cliente_atual->proximo = cliente_sucessor->proximo;
+                    free(cliente_sucessor);
+                }
+            } else {
+                if(cliente_sucessor == NULL) {
+                    free(cliente_atual);
+                    cliente_anterior->proximo == NULL
+                } else {
+                    cliente_anterior->proximo = cliente_sucessor;
+                    free(cliente_atual);
+                }
+            }
+            return 1;
+        }
+        cliente_anterior = cliente_atual;
+        cliente_atual = cliente->proximo;
+    }
+    printf(SISTEMA);
+    printf("nao ha clientes com o endereco de IP %u.\n",endCliente.sin_addr.s_addr);
+    return 0;
+}
