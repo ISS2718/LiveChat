@@ -57,10 +57,7 @@ void* enviar() {
             // Printa erro de envio
             perror("\x1B[31msend\x1B[39m"); 
 
-            // Muda variável de thread para fechar servidor
-            pthread_mutex_lock(&mutex); 
-                fechar = 1;
-            pthread_mutex_unlock(&mutex);
+            break;
         } else if((strcmp(bufferEnviar, FECHAR_CLIENTE) == 0) || (strcmp(bufferEnviar, FECHAR_SERVIDOR) == 0)) {
             // Se o que enviou foi um código de saída...
             
@@ -86,10 +83,7 @@ void* receber() {
             // Printa erro de recebimento
             perror("\x1B[31msend\x1B[39m");
 
-            // Muda variável de thread para fechar servidor
-            pthread_mutex_lock(&mutex);
-                fechar = 1;
-            pthread_mutex_unlock(&mutex);
+            break;
         } else {
             // Garante que a mensagem tem o '\0'
             bufferReceber[mensagem_tam] = '\0';
