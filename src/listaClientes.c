@@ -109,7 +109,7 @@ int existeEnderecoLista(struct sockaddr_in endereco, ListaClientes * listaClient
 }
 
 int enderecosIguais(struct sockaddr_in A, struct sockaddr_in B){
-    int bEndereco = strncmp((char *) &A.sin_addr.s_addr, (char *) &B.sin_addr.s_addr, sizeof(unsigned long));
+    int bEndereco = strncmp((char *) &A.sin_addr.s_addr, (char *) &B.sin_addr.s_addr, sizeof(unsigned int));
 
     int bPorta = strncmp((char *) &A.sin_port, (char *) &B.sin_port, sizeof(unsigned short));
 

@@ -18,7 +18,7 @@ int conectarCliente(struct sockaddr_in endCliente, InfoCliente registro, ListaCl
 void enviaMensagemTodos(char mensagem[TAM_MSG], struct sockaddr_in mensageiro, ListaClientes * listaClientes);
 InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes);
 
-const char cores[10][9] = {
+const char cores[12][9] = {
     {"\x1B[32m"},
     {"\x1B[34m"},
     {"\x1B[35m"},
@@ -80,7 +80,7 @@ int main(){
             continue;
 
         printf(MENSAGEM);
-        printf(mensagem);
+        printf("%s", mensagem);
 
         //Se o cliente não está conectado, as mensagens que chegam são informações do usuário para conectá-lo.
         if(!clienteConectado(endMensageiro, listaClientes)){

@@ -9,23 +9,9 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 
-#define PORTA 8080
-#define TAM_MSG 256
-#define TAM_NOME 64
-#define TAM_USER 16
-
-#define ERROR "/ERROR\n"
-#define FECHAR_CLIENTE "/QUIT\n"
-#define FECHAR_SERVIDOR "/SEVERKILL\n"
-
-
-#define CODIGO_REGISTRO '#'
-
-typedef struct {
-    char nome[TAM_NOME];
-    char user[TAM_USER];
-    int moderador;
-} InfoCliente;
+#include "msg.h"
+#include "config.h"
+#include "listaClientes.h"
 
 
 InfoCliente cliente;
@@ -57,10 +43,7 @@ void* enviar() {
             // Printa erro de envio
             perror("\x1B[31msend\x1B[39m"); 
 
-            // Muda variável de thread para fechar servidor
-            pthread_mutex_lock(&mutex); 
-                fechar = 1;
-            pthread_mutex_unlock(&mutex);
+            break;
         } else if((strcmp(bufferEnviar, FECHAR_CLIENTE) == 0) || (strcmp(bufferEnviar, FECHAR_SERVIDOR) == 0)) {
             // Se o que enviou foi um código de saída...
             
@@ -86,10 +69,7 @@ void* receber() {
             // Printa erro de recebimento
             perror("\x1B[31msend\x1B[39m");
 
-            // Muda variável de thread para fechar servidor
-            pthread_mutex_lock(&mutex);
-                fechar = 1;
-            pthread_mutex_unlock(&mutex);
+            break;
         } else {
             // Garante que a mensagem tem o '\0'
             bufferReceber[mensagem_tam] = '\0';
@@ -115,10 +95,14 @@ void* receber() {
 }
 
 int main(){
+    char usr_envia[TAM_NOME + TAM_USER + 1];
+
     bzero(bufferEnviar, TAM_MSG);
     bzero(bufferReceber, TAM_MSG);
+    bzero(cliente.nome, TAM_NOME);
+    bzero(cliente.user, TAM_USER);
+    bzero(usr_envia, TAM_NOME + TAM_USER + 1);
 
-    char usr_envia[TAM_NOME + TAM_USER + 1];
     
     //**********************CRIAR MACRO TAMANHO IP**********************
     char servidor_ip[TAM_NOME];
@@ -128,23 +112,20 @@ int main(){
     while(fgets(cliente.nome, TAM_NOME, stdin) == NULL){
         printf("\x1B[31mERRO:\x1B[39m Digite novamente o seu nome\n");
     }
-    
-    tirabarran(cliente.nome);
-    strcat(usr_envia, "#");
-    strcat(usr_envia, cliente.nome);
 
     printf("\x1B[33mDigite seu usuário:\x1B[39m \n");
     while(fgets(cliente.user, TAM_USER, stdin) == NULL){
         printf("\x1B[31mERRO:\x1B[39m Digite novamente o seu usuário\n");
     }
 
+    tirabarran(cliente.nome);
     tirabarran(cliente.user);
+
+    strcpy(usr_envia, "#");
+    strcat(usr_envia, cliente.nome);
     strcat(usr_envia, "#");
     strcat(usr_envia, cliente.user);
     strcat(usr_envia, "\0");
-
-    //**********************TIRAR DPS**********************
-    printf("usuário: %s\n", usr_envia);
 
     printf("\x1B[33mDigite o ip do servidor:\x1B[39m \n");
     while(!scanf("%s", servidor_ip)) {
