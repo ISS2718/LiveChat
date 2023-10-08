@@ -39,6 +39,11 @@ char bufferReceber[TAM_MSG];
 
 int fechar = 0; 
 
+void tirabarran(char* msg) {
+    int msg_tam = (int) strlen(msg);
+    msg[msg_tam-1] = '\0';
+}
+
 void* enviar() {
     while (!fechar) {
         // Zera buffer para enviar nova mensagem
@@ -118,11 +123,6 @@ void* receber() {
     pthread_exit(NULL);
 }
 
-void tirabarran(char* msg) {
-    int msg_tam = (int) strlen(msg);
-    msg[msg_tam-1] = '\0';
-}
-
 int main(){
     bzero(bufferEnviar, TAM_MSG);
     bzero(bufferReceber, TAM_MSG);
@@ -150,6 +150,7 @@ int main(){
     tirabarran(cliente.user);
     strcat(usr_envia, "#");
     strcat(usr_envia, cliente.user);
+    strcat(usr_envia, "\0");
 
     //**********************TIRAR DPS**********************
     printf("usuário: %s\n", usr_envia);
