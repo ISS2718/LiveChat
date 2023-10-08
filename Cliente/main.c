@@ -37,15 +37,13 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 char bufferEnviar[TAM_MSG];
 char bufferReceber[TAM_MSG];
 
-int fechar = 0; 
-
 void tirabarran(char* msg) {
     int msg_tam = (int) strlen(msg);
     msg[msg_tam-1] = '\0';
 }
 
 void* enviar() {
-    while (!fechar) {
+    while (1) {
         // Zera buffer para enviar nova mensagem
         bzero(bufferEnviar, TAM_MSG);
 
@@ -68,11 +66,7 @@ void* enviar() {
             
             // Printa que está saindo
             printf("\x1B[31mSaindo...\n\x1B[39m");
-
-            // Muda variável de thread para fechar servidor
-            pthread_mutex_lock(&mutex);
-                fechar = 1;
-            pthread_mutex_unlock(&mutex);
+            break;
         }
     }
 
@@ -82,7 +76,7 @@ void* enviar() {
 
 void* receber() {
     int mensagem_tam;
-    while (!fechar) {
+    while (1) {
         bzero(bufferReceber, TAM_MSG);
 
         // Recebe mensagens do servidor
@@ -108,19 +102,16 @@ void* receber() {
 
                 // Printa aviso de usuário já utilizado
                 printf("\x1B[31Error:\x1B[39m O usuário %s já está sendo utlizado, mude para conectar.\n", cliente.nome);
+                break;
                 
-                // Muda variável de thread para fechar servidor
-                pthread_mutex_lock(&mutex);
-                fechar = 1;
-                pthread_mutex_unlock(&mutex);
             } else {
                 printf("%s", bufferReceber);
             }
         }
     }
 
-    // Fecha thread
-    pthread_exit(NULL);
+    // Fecha programa pois deu erro
+    exit(1);
 }
 
 int main(){
