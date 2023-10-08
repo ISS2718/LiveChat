@@ -164,7 +164,7 @@ int main(){
     struct hostent *servidor;
     if((servidor = gethostbyname(servidor_ip)) == NULL) {        // get the host info
         printf("\x1B[31mERRO:\x1B[39m Não foi possível obter as informações do socket_c.\n");
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     printf("\x1B[33mNome Servidor:\x1B[39m %s\n", servidor->h_name);
@@ -175,7 +175,7 @@ int main(){
     if((socket_c = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
         close(socket_c);
         printf("\x1B[31mERRO:\x1B[39m Não foi possível criar o descritor do socket.\n");
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     // Guardando as configurações do socket e o endereço de conexão
@@ -188,17 +188,17 @@ int main(){
     memset(&(socket_endereço.sin_zero), '\0', 8); // utlimos 8 bytes == 0
 
     // Realizando a conexão com o servidor
-    if(connect(socket_c, (struct sockaddr*) &socket_endereço, sizeof(struct sockaddr)) == -1) {
+    if(connect(socket_c, (struct sockaddr*) &socket_endereço, sizeof(struct sockaddr))) {
         close(socket_c);
         printf("\x1B[31mERRO:\x1B[39m Não foi possível conetctar no servidor.\n");
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     // Enviando dados do usuário pro servidor utilizando o socket
     if(send(socket_c, usr_envia, strlen(usr_envia), 0) == -1) {
         perror("\x1B[31msend\x1B[39m");
         close(socket_c);
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     pthread_t thread_envia, thread_recebe;
@@ -211,11 +211,13 @@ int main(){
     pthread_create(&thread_envia, &confg_thread, enviar, NULL);
     pthread_create(&thread_recebe, &confg_thread, receber, NULL);
 
+
     pthread_join(thread_envia, NULL);
-    pthread_join(thread_recebe, NULL);
+    pthread_cancel(thread_recebe);
 
     pthread_mutex_destroy(&mutex);
 
     close(socket_c);
+
     return 0;
 }
