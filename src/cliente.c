@@ -9,7 +9,17 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 
-#include "config.h"
+#define PORTA 8080
+#define TAM_MSG 256
+#define TAM_NOME 64
+#define TAM_USER 16
+
+#define ERROR "/ERROR\n"
+#define FECHAR_CLIENTE "/QUIT\n"
+#define FECHAR_SERVIDOR "/SEVERKILL\n"
+
+
+#define CODIGO_REGISTRO '#'
 
 typedef struct {
     char nome[TAM_NOME];
@@ -27,10 +37,13 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 char bufferEnviar[TAM_MSG];
 char bufferReceber[TAM_MSG];
 
-int fechar = 0; 
+void tirabarran(char* msg) {
+    int msg_tam = (int) strlen(msg);
+    msg[msg_tam-1] = '\0';
+}
 
 void* enviar() {
-    while (!fechar) {
+    while (1) {
         // Zera buffer para enviar nova mensagem
         bzero(bufferEnviar, TAM_MSG);
 
@@ -53,11 +66,7 @@ void* enviar() {
             
             // Printa que está saindo
             printf("\x1B[31mSaindo...\n\x1B[39m");
-
-            // Muda variável de thread para fechar servidor
-            pthread_mutex_lock(&mutex);
-                fechar = 1;
-            pthread_mutex_unlock(&mutex);
+            break;
         }
     }
 
@@ -67,7 +76,7 @@ void* enviar() {
 
 void* receber() {
     int mensagem_tam;
-    while (!fechar) {
+    while (1) {
         bzero(bufferReceber, TAM_MSG);
 
         // Recebe mensagens do servidor
@@ -93,24 +102,16 @@ void* receber() {
 
                 // Printa aviso de usuário já utilizado
                 printf("\x1B[31Error:\x1B[39m O usuário %s já está sendo utlizado, mude para conectar.\n", cliente.nome);
+                break;
                 
-                // Muda variável de thread para fechar servidor
-                pthread_mutex_lock(&mutex);
-                fechar = 1;
-                pthread_mutex_unlock(&mutex);
             } else {
                 printf("%s", bufferReceber);
             }
         }
     }
 
-    // Fecha thread
-    pthread_exit(NULL);
-}
-
-void tirabarran(char* msg) {
-    int msg_tam = (int) strlen(msg);
-    msg[msg_tam-1] = '\0';
+    // Fecha programa pois deu erro
+    exit(1);
 }
 
 int main(){
@@ -140,6 +141,7 @@ int main(){
     tirabarran(cliente.user);
     strcat(usr_envia, "#");
     strcat(usr_envia, cliente.user);
+    strcat(usr_envia, "\0");
 
     //**********************TIRAR DPS**********************
     printf("usuário: %s\n", usr_envia);
@@ -153,7 +155,7 @@ int main(){
     struct hostent *servidor;
     if((servidor = gethostbyname(servidor_ip)) == NULL) {        // get the host info
         printf("\x1B[31mERRO:\x1B[39m Não foi possível obter as informações do socket_c.\n");
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     printf("\x1B[33mNome Servidor:\x1B[39m %s\n", servidor->h_name);
@@ -164,7 +166,7 @@ int main(){
     if((socket_c = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
         close(socket_c);
         printf("\x1B[31mERRO:\x1B[39m Não foi possível criar o descritor do socket.\n");
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     // Guardando as configurações do socket e o endereço de conexão
@@ -177,17 +179,17 @@ int main(){
     memset(&(socket_endereço.sin_zero), '\0', 8); // utlimos 8 bytes == 0
 
     // Realizando a conexão com o servidor
-    if(connect(socket_c, (struct sockaddr*) &socket_endereço, sizeof(struct sockaddr)) == -1) {
+    if(connect(socket_c, (struct sockaddr*) &socket_endereço, sizeof(struct sockaddr))) {
         close(socket_c);
         printf("\x1B[31mERRO:\x1B[39m Não foi possível conetctar no servidor.\n");
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     // Enviando dados do usuário pro servidor utilizando o socket
     if(send(socket_c, usr_envia, strlen(usr_envia), 0) == -1) {
         perror("\x1B[31msend\x1B[39m");
         close(socket_c);
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     pthread_t thread_envia, thread_recebe;
@@ -200,11 +202,13 @@ int main(){
     pthread_create(&thread_envia, &confg_thread, enviar, NULL);
     pthread_create(&thread_recebe, &confg_thread, receber, NULL);
 
+
     pthread_join(thread_envia, NULL);
-    pthread_join(thread_recebe, NULL);
+    pthread_cancel(thread_recebe);
 
     pthread_mutex_destroy(&mutex);
 
     close(socket_c);
+
     return 0;
 }
