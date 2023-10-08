@@ -1,57 +1,21 @@
-CC := gcc
-OUTFILE := a
-OUTDIR := bin
-OBJDIR := $(OUTDIR)/obj
+SRC := src
 
-# Flags comuns para todos os sistemas
-COMMON_FLAGS := -march=native -O3
+all: servidor cliente
 
-ifeq ($(OS), Windows_NT)
-	OUTFILE := $(OUTFILE)_win
-	OBJ_EXT := win.o
-else
-	UNAME := $(shell uname)
-	ifeq ($(UNAME), Linux)
-		OUTFILE := $(OUTFILE)_linux.out
-		OBJ_EXT := linux.o
-	endif
-endif
+allCliente: cliente runCliente
 
-# Flags de depuração
-DBFLAGS := -Wall -g3
+allServidor: servidor runServidor
 
-SRCS := $(wildcard *.c)
-OBJS := $(patsubst %.c,$(OBJDIR)/%.$(OBJ_EXT),$(SRCS))
+servidor: $(SRC)/servidor.c
+	gcc -o $(SRC)/objServidor.o -c $(SRC)/servidor.c
+	gcc -o servidor $(SRC)/objServidor.o
+	
+cliente: $(SRC)/cliente.c
+	gcc -o $(SRC)/objCliente.o -c $(SRC)/cliente.c
+	gcc -o cliente $(SRC)/objCliente.o
 
-run: $(OUTDIR)/$(OUTFILE)
-	$(OUTDIR)/$(OUTFILE)
+runCliente:
+	./cliente
 
-rund: CFLAGS += $(COMMON_FLAGS) $(DBFLAGS)
-rund: $(OUTDIR)/$(OUTFILE)_dbg
-	$(OUTDIR)/$(OUTFILE)_dbg
-
-release: CFLAGS += $(COMMON_FLAGS)
-release: $(OUTDIR) $(OBJDIR) $(OUTDIR)/$(OUTFILE)
-
-debug: CFLAGS += $(COMMON_FLAGS) $(DBFLAGS)
-debug: $(OUTDIR) $(OBJDIR) $(OUTDIR)/$(OUTFILE)_dbg
-
-$(OUTDIR):
-	mkdir -p $(OUTDIR)
-
-$(OBJDIR):
-	mkdir -p $(OBJDIR)
-
-$(OBJDIR)/%.$(OBJ_EXT): %.c
-	$(CC) -c $< -o $@ $(CFLAGS)
-
-$(OUTDIR)/$(OUTFILE): $(OBJS)
-	$(CC) $^ -o $@ $(CFLAGS)
-
-$(OUTDIR)/$(OUTFILE)_dbg: $(OBJS)
-	$(CC) $^ -o $@ $(CFLAGS)
-
-clean:
-	rm -rf $(OUTDIR)
-
-.PHONY: run rund release debug clean
+runServidor:
+	./servidor

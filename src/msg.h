@@ -7,4 +7,7 @@
 #define ERRO_MENSAGEM "Nao foi possivel enviar a mensagem.\n"
 #define CLIENTE_NAO_ENCONTRADO "Cliente nao foi encontrado! \n"
 
+#define MENSAGEM "\x1B[33mMENSAGEM: \x1B[37m"
+#define SISTEMA "\x1B[33mSISTEMA: \x1B[37m"
+
 #endif
