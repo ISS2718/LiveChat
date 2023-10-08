@@ -125,7 +125,7 @@ int main(){
     strcat(usr_envia, cliente.nome);
     strcat(usr_envia, "#");
     strcat(usr_envia, cliente.user);
-    strcat(usr_envia, "\0");
+    strcat(usr_envia, "\n\0");
 
     printf("\x1B[33mDigite o ip do servidor:\x1B[39m \n");
     while(!scanf("%s", servidor_ip)) {
