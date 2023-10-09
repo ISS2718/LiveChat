@@ -1,20 +1,19 @@
 #include "msg.h"
 
-void AVISO() {
-    printf("\x1B[31mA\x1B[33mV\x1B[31mI\x1B[33mV\x1B[31mI\x1B[33mS\x1B[31mO\x1B[33m:\x1B[39m ");
-}
-
-void ERRO() {
-    printf("\x1B[31ERRO:\x1B[39m ");
-}
-
-void MESAGEM() {
-    printf("\x1B[33mMENSAGEM:\x1B[39m ");
-}
-
-void SISTEMA(){
-    printf("\x1B[33mSISTEMA:\x1B[39m ");
-}
+const char cores[12][9] = {
+    {"\x1B[32m"},
+    {"\x1B[34m"},
+    {"\x1B[35m"},
+    {"\x1B[36m"},
+    {"\x1B[91m"},
+    {"\x1B[92m"},
+    {"\x1B[93m"},
+    {"\x1B[94m"},
+    {"\x1B[95m"},
+    {"\x1B[96m"},
+    {"\x1B[37m"},
+    {"\x1B[39m"}
+};
 
 void colocaCorUser(char *s, int cor) {
 

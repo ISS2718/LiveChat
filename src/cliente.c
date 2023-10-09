@@ -36,14 +36,13 @@ void* enviar() {
             // Se não conseguiu enviar...
 
             // Printa erro de envio
-            perror("\x1B[31msend\x1B[39m"); 
-
+            printf(ERRO"Não foi possível enviar mensagem!\n"); 
             break;
         } else if((strcmp(bufferEnviar, FECHAR_CLIENTE) == 0) || (strcmp(bufferEnviar, FECHAR_SERVIDOR) == 0)) {
             // Se o que enviou foi um código de saída...
             
             // Printa que está saindo
-            printf("\x1B[31mSaindo...\n\x1B[39m");
+            printf(AMARELO"Saindo...\n"RESET);
             break;
         }
     }
@@ -62,9 +61,7 @@ void* receber() {
             // Se não foi possível receber...
 
             // Printa erro de recebimento
-            ERRO()
-            printf("")
-
+            printf(ERRO"Não foi possível receber mensagem!");
             break;
         } else {
             // Garante que a mensagem tem o '\0'
@@ -77,8 +74,7 @@ void* receber() {
                 // Se usuário já estiver sendo utilizado...
 
                 // Printa aviso de usuário já utilizado
-                ERRO();
-                printf("O usuário %s já está sendo utlizado, mude para conectar.\n", cliente.user);
+                printf(ERRO"O usuário %s já está sendo utlizado, mude para conectar.\n", cliente.user);
                 break;
                 
             } else {
@@ -105,14 +101,14 @@ int main(){
     char servidor_ip[TAM_NOME];
 
     // pegando informações do usuário
-    printf("\x1B[33mDigite seu nome:\x1B[39m \n");
+    printf(AMARELO"Digite seu nome:\n"RESET);
     while(fgets(cliente.nome, TAM_NOME, stdin) == NULL){
-        printf("\x1B[31mERRO:\x1B[39m Digite novamente o seu nome\n");
+        printf(ERRO"Digite novamente o seu nome\n");
     }
 
-    printf("\x1B[33mDigite seu usuário:\x1B[39m \n");
+    printf(AMARELO"Digite seu usuário:\n"RESET);
     while(fgets(cliente.user, TAM_USER, stdin) == NULL){
-        printf("\x1B[31mERRO:\x1B[39m Digite novamente o seu usuário\n");
+        printf(ERRO"Digite novamente o seu usuário\n");
     }
 
     tirabarran(cliente.nome);
@@ -124,28 +120,29 @@ int main(){
     strcat(usr_envia, cliente.user);
     strcat(usr_envia, "\n\0");
 
-    printf("\x1B[33mDigite o ip do servidor:\x1B[39m \n");
+    printf(AMARELO"Digite o ip do servidor:\n"RESET);
     while(!scanf("%s", servidor_ip)) {
-        printf("\x1B[31mERRO:\x1B[39m Digite novamente o seu usuário\n");
+        printf(ERRO"Digite novamente o seu usuário\n");
     }
 
     // pegando informações do servidor
-    struct hostent *servidor;
-    if((servidor = gethostbyname(servidor_ip)) == NULL) {        // get the host info
-        printf("\x1B[31mERRO:\x1B[39m Não foi possível obter as informações do socket_c.\n");
+    struct hostent *servidor = gethostbyname(servidor_ip);
+    if(servidor == NULL) {        // get the host info
+        printf(ERRO"Não foi possível obter as informações do socket_c.\n");
         return 1;
     }
 
-    printf("\x1B[33mNome Servidor:\x1B[39m %s\n", servidor->h_name);
-    printf("\x1B[33mEndereço IP do Servidor:\x1B[39m %s\n", inet_ntoa((struct in_addr)*((struct in_addr *)servidor->h_addr)));
+    printf(AMARELO"Nome Servidor:"RESET"%s\n", servidor->h_name);
+    printf(AMARELO"Endereço IP do Servidor:"RESET"%s\n", inet_ntoa((struct in_addr)*((struct in_addr *)servidor->h_addr)));
 
 
     // Criando e configurando o socket como IPV4, UDP e IPROTO_UDP
     if((socket_c = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
         close(socket_c);
-        printf("\x1B[31mERRO:\x1B[39m Não foi possível criar o descritor do socket.\n");
+        printf(ERRO"Não foi possível criar o descritor do socket.\n");
         return 1;
     }
+    printf("%d", socket_c);
 
     // Guardando as configurações do socket e o endereço de conexão
     struct sockaddr_in socket_endereço;
@@ -159,13 +156,13 @@ int main(){
     // Realizando a conexão com o servidor
     if(connect(socket_c, (struct sockaddr*) &socket_endereço, sizeof(struct sockaddr))) {
         close(socket_c);
-        printf("\x1B[31mERRO:\x1B[39m Não foi possível conetctar no servidor.\n");
+        printf(ERRO"Não foi possível conetctar no servidor.\n");
         return 1;
     }
 
     // Enviando dados do usuário pro servidor utilizando o socket
     if(send(socket_c, usr_envia, strlen(usr_envia), 0) == -1) {
-        perror("\x1B[31msend\x1B[39m");
+        printf(ERRO"Fallha no envio do login!\n");
         close(socket_c);
         return 1;
     }
