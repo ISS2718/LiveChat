@@ -12,4 +12,9 @@
 #define FECHAR_CLIENTE "/QUIT"
 #define FECHAR_SERVIDOR "/SEVERKILL"
 #define SUSSURRO "/SUSSURRO"
+#define MOD "/MOD"
+
+#define MODERADOR1 "ikuyorih9"
+#define MODERADOR2 "iss2718"
+
 #endif

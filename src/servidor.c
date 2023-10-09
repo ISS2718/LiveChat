@@ -11,18 +11,18 @@
 #include "msg.h"
 
 const char cores[12][9] = {
-    {"\x1B[32m"},
-    {"\x1B[34m"},
-    {"\x1B[35m"},
-    {"\x1B[36m"},
-    {"\x1B[91m"},
-    {"\x1B[92m"},
-    {"\x1B[93m"},
-    {"\x1B[94m"},
-    {"\x1B[95m"},
-    {"\x1B[96m"},
-    {"\x1B[37m"},
-    {"\x1B[39m"}
+    {"\x1B[32m"}, //VERDE
+    {"\x1B[34m"}, //AZUL
+    {"\x1B[35m"}, //MAGENTA
+    {"\x1B[36m"}, //CIANO
+    {"\x1B[91m"}, //VERMELHO CLARO
+    {"\x1B[92m"}, //VERDE CLARO
+    {"\x1B[93m"}, //AMARELO CLARO
+    {"\x1B[94m"}, //AZUL CLARO
+    {"\x1B[95m"}, //MAGENTA CLARO
+    {"\x1B[96m"}, //CIANO CLARO
+    {"\x1B[37m"}, //BRANCO
+    {"\x1B[39m"}  //RESET
 };
 
 int rSocket;
@@ -34,6 +34,7 @@ void enviaMensagemTodos(char mensagem[TAM_MSG], struct sockaddr_in mensageiro, L
 InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes);
 int enviaMensagemCliente(Cliente * cliente, char mensagem[TAM_MSG]);
 Cliente * retornaClientePorUsuario(char usuario[TAM_USER], ListaClientes * listaClientes);
+Cliente * retornaClientePorEndereco(struct sockaddr_in endereco, ListaClientes * listaClientes);
 int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG], ListaClientes * listaClientes);
 
 int main(){
@@ -96,6 +97,9 @@ int main(){
             printf("\t\t MODERADOR: %d\n", infoCliente.moderador);
             printf("\t\t COR: %d\n", infoCliente.cor);
             
+            if(strcmp(infoCliente.user, MODERADOR1) == 0 || strcmp(infoCliente.user, MODERADOR2) == 0){
+                infoCliente.moderador = 1;
+            }
             
             if(conectarCliente(endMensageiro, infoCliente, listaClientes)){
                 printf(AVISO"User %s conectado!\n", infoCliente.user);
@@ -166,8 +170,8 @@ int conectarCliente(struct sockaddr_in endCliente, InfoCliente registro, ListaCl
 
     insereListaClientes(registro, endCliente, listaClientes);
 
-    printf("%s (%s): ", registro.nome, registro.user);
-    printf(SISTEMA SUCESSO_CONEXAO_CLIENTE);
+    printf(SISTEMA "%s (%s): ", registro.nome, registro.user);
+    printf(SUCESSO_CONEXAO_CLIENTE);
     return 0;
 }
 
@@ -268,9 +272,83 @@ int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG],
 
     
     if(strcmp(funcao, SUSSURRO) == 0){
-        //Cliente * cliente = retornaClientePorUsuario(param,listaClientes);
-        //printf("%s\n", cliente->registro.user);
-        //enviaMensagemCliente(cliente, param);
+        Cliente * clienteMensageiro = retornaClientePorEndereco(mensageiro, listaClientes);
+        Cliente * cliente = retornaClientePorUsuario(param1,listaClientes);
+        if(cliente == NULL){
+            char msg[TAM_MSG];
+            strcpy(msg, ERRO);
+            strcat(msg, "usuario nao foi encontrado!\n");
+            strcat(msg, "\0");
+            printf(ERRO "o usuario buscado nao esta conectado!\n");
+            enviaMensagemCliente(clienteMensageiro, msg);
+            return 1;
+        }
+
+        InfoCliente registroMensageiro = retornaRegistroPorEndereco(mensageiro, listaClientes);
+
+        char mensagemCompleta[TAM_MSG];
+        bzero(mensagemCompleta, TAM_MSG);
+
+        strcat(mensagemCompleta, cores[2]);
+        strcat(mensagemCompleta, registroMensageiro.nome);
+        strcat(mensagemCompleta, "(");
+        strcat(mensagemCompleta, registroMensageiro.user);
+        strcat(mensagemCompleta, "): ");
+        strcat(mensagemCompleta, param2);
+        strcat(mensagemCompleta, RESET);
+        strcat(mensagemCompleta, "\n\0");
+
+        printf(MENSAGEM"(para %s) %s", param1, mensagemCompleta);
+        enviaMensagemCliente(cliente, mensagemCompleta);
+        return 1;
+    }
+    else if(strcmp(funcao, MOD) == 0){
+        Cliente * clienteMensageiro = retornaClientePorEndereco(mensageiro, listaClientes);
+
+        Cliente * cliente = retornaClientePorUsuario(param1, listaClientes);
+        if(cliente == NULL){
+            char msg[TAM_MSG];
+            strcpy(msg, ERRO);
+            strcat(msg, "usuario nao foi encontrado!\n");
+            strcat(msg, "\0");
+            printf(ERRO "o usuario buscado nao esta conectado!\n");
+            enviaMensagemCliente(clienteMensageiro, msg);
+            return 1;
+        }
+
+        if(clienteMensageiro->registro.moderador != 1){
+            char msg[TAM_MSG];
+            strcpy(msg, ERRO);
+            strcat(msg, "você não pode executar essa função!\n");
+            strcat(msg, "\0");
+            enviaMensagemCliente(clienteMensageiro, msg);
+            printf(ERRO "usuario %s nao e moderador.\n", clienteMensageiro->registro.user);
+
+            return 1;
+        }
+        
+        if(cliente->registro.moderador == 0){
+            cliente->registro.moderador = 1;
+            char msg[TAM_MSG];
+            strcpy(msg, AMARELO);
+            strcat(msg, clienteMensageiro->registro.user);
+            strcat(msg, " te deu poder de moderador!\n");
+            strcat(msg, RESET);
+            strcat(msg, "\0");
+            enviaMensagemCliente(cliente, msg);
+            printf(SISTEMA "usuario %s deu poder de moderador a %s.\n", clienteMensageiro->registro.user, cliente->registro.user);
+        }
+        else{
+            char msg[TAM_MSG];
+            strcpy(msg, AMARELO);
+            strcat(msg, cliente->registro.user);
+            strcat(msg, " ja possui poder de moderador.\n");
+            strcat(msg, RESET);
+            strcat(msg, "\0");
+            enviaMensagemCliente(clienteMensageiro, msg);
+            printf(SISTEMA "usuario %s tentou dar poder de moderador a %s.\n", clienteMensageiro->registro.user, cliente->registro.user);
+        }
+        
         return 1;
     } else if(strcmp(funcao, FECHAR_CLIENTE) == 0) {
         InfoCliente desconectado = retornaRegistroPorEndereco(mensageiro, listaClientes);
