@@ -329,12 +329,12 @@ int verificaExecutaFuncao(char mensagem[TAM_MSG], ListaClientes * listaClientes)
     printf(SISTEMA "PARAMETRO 1: %s\n", param1);
     printf(SISTEMA "PARAMETRO 2: %s\n", param2);
 
-    /*
+    
     if(strcmp(funcao, SUSSURRO) == 0){
-        Cliente * cliente = retornaClientePorUsuario(param,listaClientes);
-        printf("%s\n", cliente->registro.user);
-        enviaMensagemCliente(cliente, param);
+        //Cliente * cliente = retornaClientePorUsuario(param,listaClientes);
+        //printf("%s\n", cliente->registro.user);
+        //enviaMensagemCliente(cliente, param);
         return 1;
-    }*/
+    }
     return 0;
 }
