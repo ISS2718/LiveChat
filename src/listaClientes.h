@@ -10,6 +10,7 @@ typedef struct infoCliente{
     char user[TAM_USER];
     int moderador;
     int cor;
+    int mute;
 }InfoCliente;
 
 typedef struct cliente{

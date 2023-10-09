@@ -105,7 +105,7 @@ int main(){
                 enviaMensagemTodos(statusCliente, endMensageiro, listaClientes);
             }
         }
-        else{
+        else {
             InfoCliente registroMensageiro = retornaRegistroPorEndereco(endMensageiro, listaClientes);
             
             char mensagemCompleta[TAM_MSG];
@@ -121,7 +121,12 @@ int main(){
             strcat(mensagemCompleta, "\n\0");
 
             printf(MENSAGEM"%s", mensagemCompleta);
-            enviaMensagemTodos(mensagemCompleta,endMensageiro, listaClientes);
+
+            if(registroMensageiro.mute == 0) {
+                enviaMensagemTodos(mensagemCompleta,endMensageiro, listaClientes);
+            } else {
+                printf(AVISO "Usuário %s mutado\n", registroMensageiro.user);
+            }
         }
 
     }
@@ -210,6 +215,7 @@ InfoCliente criaRegistroCliente(char * infoGeral){
         srand(time(NULL)%7);
         infoCliente.cor = rand()%10;
         infoCliente.moderador = 0;
+        infoCliente.mute = 0;
     }
 
     return infoCliente;
