@@ -18,22 +18,6 @@ int conectarCliente(struct sockaddr_in endCliente, InfoCliente registro, ListaCl
 void enviaMensagemTodos(char mensagem[TAM_MSG], struct sockaddr_in mensageiro, ListaClientes * listaClientes);
 InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes);
 
-const char cores[12][9] = {
-    {"\x1B[32m"},
-    {"\x1B[34m"},
-    {"\x1B[35m"},
-    {"\x1B[36m"},
-    {"\x1B[91m"},
-    {"\x1B[92m"},
-    {"\x1B[93m"},
-    {"\x1B[94m"},
-    {"\x1B[95m"},
-    {"\x1B[96m"},
-    {"\x1B[37m"},
-    {"\x1B[39m"}
-};
-
-
 int main(){
     struct sockaddr_in endServidor;
     struct sockaddr_in endMensageiro;
