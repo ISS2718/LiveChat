@@ -67,25 +67,31 @@ void* receber() {
             // Garante que a mensagem tem o '\0'
             bufferReceber[mensagem_tam] = '\0';
 
-            // Verifica se não foi uma mensagem de erro do servidor
-            //****************MUDAR ESSA MACRO DE ERRO*******************
-            // ERRO DE USUÁRIO JÁ UTILIZADO
-            if(strcmp(ERROR, bufferReceber) == 0) {
+            // Verifica se não foi um código de servidor
+            if(strcmp(USUARIO_CADASTRADO, bufferReceber) == 0) {
                 // Se usuário já estiver sendo utilizado...
 
                 // Printa aviso de usuário já utilizado
                 printf(ERRO"O usuário %s já está sendo utlizado, mude para conectar.\n", cliente.user);
-                break;
                 
-            } 
-            else {
+                // Fecha cliente com erro, pois deu erro de usuário já conectado
+                exit(1);
+            } else if(strcmp(DESCONECTAR, bufferReceber) == 0) {
+                // Se usuário foi desconectado...
+
+                //Printa aviso que o servidor desconectou este usuário
+                printf(SISTEMA"O servidor te desconectou");
+
+                // Fecha cliente sem erro, pois o servidor que o desconectou.
+                exit(0);
+            } else {
                 printf("%s", bufferReceber);
             }
         }
     }
 
-    // Fecha programa pois deu erro
-    exit(1);
+    // Fecha thread
+    pthread_exit(NULL);
 }
 
 int main(){

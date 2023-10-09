@@ -31,7 +31,8 @@ int rSocket;
 InfoCliente criaRegistroCliente(char * infoGeral);
 int clienteConectado(struct sockaddr_in endCliente, ListaClientes * listaClientes);
 int conectarCliente(struct sockaddr_in endCliente, InfoCliente registro, ListaClientes * listaClientes);
-void enviaMensagemTodos(char mensagem[TAM_MSG], struct sockaddr_in mensageiro, ListaClientes * listaClientes);
+void enviaMensagemParaOutros(char mensagem[TAM_MSG], struct sockaddr_in mensageiro, ListaClientes * listaClientes);
+void enviaMensagemParaTodos(char mensagem[TAM_MSG], ListaClientes * listaClientes);
 int enviaMensagemCliente(Cliente * cliente, char mensagem[TAM_MSG]);
 int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG], ListaClientes * listaClientes);
 
@@ -108,7 +109,7 @@ int main(){
                 strcat(statusCliente, " esta conectado!");
                 strcat(statusCliente, "\0");
                 
-                enviaMensagemTodos(statusCliente, endMensageiro, listaClientes);
+                enviaMensagemParaOutros(statusCliente, endMensageiro, listaClientes);
             }
         }
         else{
@@ -132,7 +133,7 @@ int main(){
             printf(MENSAGEM"%s", mensagemCompleta);
 
             if(registroMensageiro.mute == 0) {
-                enviaMensagemTodos(mensagemCompleta,endMensageiro, listaClientes);
+                enviaMensagemParaOutros(mensagemCompleta,endMensageiro, listaClientes);
             } else {
                 printf(AVISO "Usuário %s mutado\n", registroMensageiro.user);
             }
@@ -157,7 +158,7 @@ int conectarCliente(struct sockaddr_in endCliente, InfoCliente registro, ListaCl
     if(existeClienteLista(registro, listaClientes)){
         printf(SISTEMA CLIENTE_JA_CONECTADO);
 
-        int rMensagem = sendto(rSocket, ERROR, strlen(CLIENTE_JA_CONECTADO), 0, (struct sockaddr *) &endCliente, sizeof(struct sockaddr));
+        int rMensagem = sendto(rSocket, USUARIO_CADASTRADO, strlen(CLIENTE_JA_CONECTADO), 0, (struct sockaddr *) &endCliente, sizeof(struct sockaddr));
         
         if(rMensagem == -1){
             printf(ERRO ERRO_CONECTAR_CLIENTE);
@@ -176,7 +177,7 @@ int conectarCliente(struct sockaddr_in endCliente, InfoCliente registro, ListaCl
     strcat(mensagem, RESET);
     strcat(mensagem, "\n\0");
 
-    enviaMensagemTodos(mensagem, endCliente, listaClientes);
+    enviaMensagemParaOutros(mensagem, endCliente, listaClientes);
 
     printf(SISTEMA "%s (%s): ", registro.nome, registro.user);
     printf(SUCESSO_CONEXAO_CLIENTE);
@@ -194,7 +195,7 @@ int clienteConectado(struct sockaddr_in endCliente, ListaClientes * listaCliente
     }
 }
 
-void enviaMensagemTodos(char mensagem[TAM_MSG], struct sockaddr_in mensageiro, ListaClientes * listaClientes){
+void enviaMensagemParaOutros(char mensagem[TAM_MSG], struct sockaddr_in mensageiro, ListaClientes * listaClientes){
     Cliente * cliente = *listaClientes;
     
     while(cliente != NULL){
@@ -205,9 +206,25 @@ void enviaMensagemTodos(char mensagem[TAM_MSG], struct sockaddr_in mensageiro, L
             if(ret == -1){
                 printf(ERRO "%s (%s): ", cliente->registro.nome, cliente->registro.user);
                 printf(ERRO ERRO_MENSAGEM);
-                break;;
+                break;
             }
         }
+        cliente = cliente->proximo;
+    }
+}
+
+void enviaMensagemParaTodos(char mensagem[TAM_MSG], ListaClientes * listaClientes) {
+    Cliente * cliente = *listaClientes;
+    
+    while(cliente != NULL){
+        int ret = sendto(rSocket, mensagem, strlen(mensagem),0, (struct sockaddr *)&cliente->endereco, sizeof(struct sockaddr));
+            
+        if(ret == -1){
+            printf(ERRO "%s (%s): ", cliente->registro.nome, cliente->registro.user);
+            printf(ERRO ERRO_MENSAGEM);
+            break;
+        }
+
         cliente = cliente->proximo;
     }
 }
@@ -352,7 +369,7 @@ int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG],
                 strcat(msg, ".");
                 strcat(msg, RESET);
                 strcat(msg, "\n\0");
-                enviaMensagemTodos(msg, mensageiro, listaClientes);
+                enviaMensagemParaOutros(msg, mensageiro, listaClientes);
 
                 strcpy(msg, AMARELO);
                 strcat(msg, "você deu poder de moderador a ");
@@ -401,7 +418,7 @@ int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG],
                 strcat(msg, ".");
                 strcat(msg, RESET);
                 strcat(msg, "\n\0");
-                enviaMensagemTodos(msg, mensageiro, listaClientes);
+                enviaMensagemParaOutros(msg, mensageiro, listaClientes);
 
                 strcpy(msg, AMARELO);
                 strcat(msg, "você retirou poder de moderador de ");
@@ -428,7 +445,7 @@ int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG],
         strcat(mensagem, RESET);
         strcat(mensagem, " \n\0");
         //enviaMensagemCliente(clienteMensageiro, mensagem);
-        enviaMensagemTodos(mensagem, mensageiro, listaClientes);
+        enviaMensagemParaOutros(mensagem, mensageiro, listaClientes);
         removeClientePorUsuario(clienteMensageiro->registro.user, listaClientes);
         printf(SISTEMA "cliente removido.\n");
         return 1;
@@ -438,30 +455,29 @@ int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG],
         Cliente * clienteMensageiro = retornaClientePorEndereco(mensageiro, listaClientes);
         char mensagem[TAM_USER + 50];
         if(clienteMensageiro->registro.moderador == 1) {
+            // Envia aviso de encerramento para os usuários, que o LiveChat foi encerrado pelo moderador "tal".
             strcpy(mensagem, AMARELO);
             strcat(mensagem, clienteMensageiro->registro.user);
             strcat(mensagem, " encerrou o LiveChat.");
             strcat(mensagem, RESET);
             strcat(mensagem, " \n\0");
-            enviaMensagemTodos(mensagem, mensageiro, listaClientes);
+            enviaMensagemParaOutros(mensagem, mensageiro, listaClientes);
 
+            // Envia aviso de encerramento para o moderador que encerrou o LiveChat.
             strcpy(mensagem, AMARELO);
             strcat(mensagem, "Você encerrou o LiveChat.");
             strcat(mensagem, RESET);
             strcat(mensagem, " \n\0");
-
             enviaMensagemCliente(clienteMensageiro, mensagem);
 
-            Cliente * cliente = *listaClientes;
-            while(cliente != NULL){
-                strcpy(mensagem, AMARELO);
-                strcat(mensagem, "Você foi desconectado do servidor.");
-                strcat(mensagem, RESET);
-                strcat(mensagem, "\n\0");
-                cliente = cliente->proximo;
-            }
-            printf(SISTEMA "o servidor foi finalizado.\n");
+            // Desconecta todos os clientes
+            enviaMensagemParaTodos(DESCONECTAR, listaClientes);
             liberaListaClientes(listaClientes);
+
+            // Avisa no terminal do servidor que ele foi finalizado
+            printf(SISTEMA "o servidor foi finalizado.\n");
+
+            // Finaliza sem erro o servidor; 
             exit(0);
         } 
         else{
@@ -492,7 +508,7 @@ int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG],
                     strcat(mensagem, " foi mutado."); 
                     strcat(mensagem, RESET);
                     strcat(mensagem, " \n\0");
-                    enviaMensagemTodos(mensagem, mensageiro, listaClientes);
+                    enviaMensagemParaOutros(mensagem, mensageiro, listaClientes);
 
                     strcpy(mensagem, AMARELO);
                     strcat(mensagem, "você mutou ");
@@ -532,7 +548,7 @@ int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG],
                     strcat(mensagem, " foi desmutado.");
                     strcat(mensagem, RESET);
                     strcat(mensagem, " \n\0");
-                    enviaMensagemTodos(mensagem, mensageiro, listaClientes);
+                    enviaMensagemParaOutros(mensagem, mensageiro, listaClientes);
 
                     strcpy(mensagem, AMARELO);
                     strcat(mensagem, "você desmutou ");
