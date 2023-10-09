@@ -347,38 +347,63 @@ int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG],
         }
         
         return 1;
-    } else if(strcmp(funcao, FECHAR_CLIENTE) == 0) {
-        InfoCliente desconectado = retornaRegistroPorEndereco(mensageiro, listaClientes);
+    } 
+    else if(strcmp(funcao, FECHAR_CLIENTE) == 0) {
+        Cliente * clienteMensageiro = retornaClientePorEndereco(mensageiro, listaClientes);
         char mensagem[TAM_USER + 50];
         strcpy(mensagem, "\x1B[31mUsuário: ");
-        strcat(mensagem, desconectado.user);
+        strcat(mensagem, clienteMensageiro->registro.user);
         strcat(mensagem, " desconectado");
         strcat(mensagem, RESET);
         strcat(mensagem, " \n\0");
+        enviaMensagemCliente(clienteMensageiro, mensagem);
         enviaMensagemTodos(mensagem, mensageiro, listaClientes);
-        //removeListaPorUsuario(desconectado.user, listaClientes);
-    } else if(strcmp(funcao, FECHAR_SERVIDOR) == 0) {
-        InfoCliente desconectado = retornaRegistroPorEndereco(mensageiro, listaClientes);
+        removeClientePorUsuario(clienteMensageiro->registro.user, listaClientes);
+        
+        return 1;
+    } 
+    else if(strcmp(funcao, FECHAR_SERVIDOR) == 0) {
+        Cliente * clienteMensageiro = retornaClientePorEndereco(mensageiro, listaClientes);
         char mensagem[TAM_USER + 50];
-        if(desconectado.moderador == 1) {
-            strcpy(mensagem, "\x1B[31mModerador: ");
-            strcat(mensagem, desconectado.user);
-            strcat(mensagem, " encerrou o LiveChat");
+        if(clienteMensageiro->registro.moderador == 1) {
+            strcpy(mensagem, AMARELO);
+            strcat(mensagem, clienteMensageiro->registro.user);
+            strcat(mensagem, " encerrou o LiveChat.");
             strcat(mensagem, RESET);
             strcat(mensagem, " \n\0");
             enviaMensagemTodos(mensagem, mensageiro, listaClientes);
+
+            strcpy(mensagem, AMARELO);
+            strcat(mensagem, "Você encerrou o LiveChat.");
+            strcat(mensagem, RESET);
+            strcat(mensagem, " \n\0");
+
+            enviaMensagemCliente(clienteMensageiro, mensagem);
+
+            Cliente * cliente = *listaClientes;
+            while(cliente != NULL){
+                strcpy(mensagem, AMARELO);
+                strcat(mensagem, "Você foi desconectado do servidor.");
+                strcat(mensagem, RESET);
+                strcat(mensagem, "\n\0");
+                cliente = cliente->proximo;
+            }
+            printf(SISTEMA "o servidor foi finalizado.\n");
             liberaListaClientes(listaClientes);
             exit(0);
-        } else {
-            strcpy(mensagem, "\x1B[31mUsuário: ");
-            strcat(mensagem, desconectado.user);
-            strcat(mensagem, " desconectado");
-            strcat(mensagem, RESET);
-            strcat(mensagem, " \n\0");
-            enviaMensagemTodos(mensagem, mensageiro, listaClientes);
-            //removeListaPorUsuario(desconectado.user, listaClientes);
+        } 
+        else{
+            strcpy(mensagem, ERRO);
+            strcat(mensagem, "você não pode executar essa função!\n");
+            strcat(mensagem, "\0");
+            enviaMensagemCliente(clienteMensageiro, mensagem);
+            printf(ERRO "usuario %s nao e moderador.\n", clienteMensageiro->registro.user);
         }
-    }  else if(strcmp(funcao, MUTE) == 0) {
+
+        return 1;
+    }
+    //FUNÇÃO QUE MUTA O USUÁRIO SELECIONADO.
+    else if(strcmp(funcao, MUTE) == 0) {
         InfoCliente moderador = retornaRegistroPorEndereco(mensageiro, listaClientes);
         if(moderador.moderador == 1) {
             Cliente * mutado = retornaClientePorUsuario(param1, listaClientes); 
@@ -401,6 +426,38 @@ int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG],
         
             enviaMensagemTodos(mensagem, mensageiro, listaClientes);
         }
+    }
+    //FUNÇÃO QUE IMPRIME TODOS OS USUÁRIOS.
+    else if(strcmp(funcao, MOSTRAR_CLIENTES) == 0){
+        Cliente * clienteMensageiro = retornaClientePorEndereco(mensageiro, listaClientes);
+        char mensagem[TAM_MSG];
+
+        if(listaClientes == NULL || *listaClientes == NULL){
+            strcpy(mensagem, AMARELO);
+            strcat(mensagem, "Não há clientes conectados.: \n");
+            strcat(mensagem, RESET);
+            strcat(mensagem, "\0");
+            enviaMensagemCliente(clienteMensageiro, mensagem);
+        }
+        
+        strcpy(mensagem, AMARELO);
+        strcat(mensagem, "CLIENTES CONECTADOS: \n");
+        strcat(mensagem, RESET);
+        strcat(mensagem, "\0");
+        enviaMensagemCliente(clienteMensageiro, mensagem);
+        
+        Cliente * cliente = *listaClientes;
+        while(cliente != NULL){
+            strcpy(mensagem, "- ");
+            strcat(mensagem, cores[cliente->registro.cor]);
+            strcat(mensagem, cliente->registro.user);
+            strcat(mensagem, RESET);
+            strcat(mensagem, "\n\0");
+            enviaMensagemCliente(clienteMensageiro, mensagem);
+
+            cliente = cliente->proximo;
+        }
+        return 1;
     }
     
     return 0;

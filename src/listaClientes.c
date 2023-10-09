@@ -45,6 +45,7 @@ InfoCliente criaRegistroCliente(char * infoGeral){
         strcpy(infoCliente.user, "\0");
         infoCliente.moderador = -1;
         infoCliente.cor = -1;
+        infoCliente.mute = -1;
     }
     else{
         strcpy(infoCliente.nome, mRegistro[0]);
@@ -198,6 +199,7 @@ InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, ListaClien
     strcat(infoCliente.nome, "\0");
     strcat(infoCliente.user, "\0");
     infoCliente.moderador = -1;
+    infoCliente.mute = -1;
     
     Cliente * cliente = *listaClientes;
     while(cliente!=NULL){
@@ -215,62 +217,67 @@ InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, ListaClien
     return infoCliente;
 }
 
-void removeListaPorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes) {
-    Cliente * cliente_anterior = NULL;
-    Cliente * cliente_atual = *listaClientes;
-    Cliente * cliente_sucessor = cliente_atual->proximo;
-    while(cliente_atual!=NULL){
-        struct sockaddr_in endClienteLista = cliente_atual->endereco;
-        int bClientesIguais = enderecosIguais(endCliente, endClienteLista);
-        if(bClientesIguais){
-            if(cliente_anterior == NULL) {
-                if(cliente_sucessor == NULL) {
-                    free(cliente_atual);
-                } else {
-                    cliente_atual->registro = cliente_sucessor->registro;
-                    cliente_atual->proximo = cliente_sucessor->proximo;
-                    free(cliente_sucessor);
-                }
-            } else {
-                if(cliente_sucessor == NULL) {
-                    cliente_anterior->proximo = NULL;
-                } else {
-                    cliente_anterior->proximo = cliente_sucessor;
-                }
-                free(cliente_atual);
+//REMOVE UM CLIENTE DA LISTA ATRAVÉS DO SEU ENDEREÇO
+void removeClientePorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes) {
+
+    //Se não há lista ou não há itens na lista, retorna.
+    if(listaClientes == NULL || *listaClientes == NULL){
+        return;
+    }
+
+    Cliente * anterior = NULL;
+    Cliente * atual = *listaClientes;
+
+    //Percorre todos os itens existentes da lista de clientes.
+    while(atual->proximo != NULL){
+        //Compara os endereços do cliente atual com o buscado.
+        if(enderecosIguais(atual->endereco, endCliente)){
+            //Se o endereço buscado foi o primeiro item, então a lista começa com o proximo do atual.
+            if(anterior == NULL){
+                *listaClientes = atual->proximo;
             }
+            //Se o endereço buscado não for o primeiro item, o item anterior tem o próximo do atual como sucessor.
+            else{
+                anterior->proximo = atual->proximo;
+            }
+            //Libera o nó atual.
+            free(atual);
+            break;
         }
-        cliente_anterior = cliente_atual;
-        cliente_atual = cliente_atual->proximo;
-        cliente_sucessor = cliente_atual->proximo;
+
+        anterior = atual;
+        atual = atual->proximo;
     }
 }
 
-void removeListaPorUsuario(char * usuario, ListaClientes * listaClientes) {
-    Cliente * cliente_anterior = NULL;
-    Cliente * cliente_atual = *listaClientes;
-    Cliente * cliente_sucessor = cliente_atual->proximo;
-    while(cliente_atual != NULL){
-        if(strcmp(cliente_atual->registro.user, usuario) == 0) {
-            if(cliente_anterior == NULL) {
-                if(cliente_sucessor == NULL) {
-                    free(cliente_atual);
-                } else {
-                    cliente_atual->registro = cliente_sucessor->registro;
-                    cliente_atual->proximo = cliente_sucessor->proximo;
-                    free(cliente_sucessor);
-                }
-            } else {
-                if(cliente_sucessor == NULL) {
-                    cliente_anterior->proximo = NULL;
-                } else {
-                    cliente_anterior->proximo = cliente_sucessor;
-                }
-                free(cliente_atual);
+//REMOVE UM CLIENTE DA LISTA ATRAVÉS DO SEU USUÁRIO.
+void removeClientePorUsuario(char * usuario, ListaClientes * listaClientes) {
+    //Se não há lista ou não há itens na lista, retorna.
+    if(listaClientes == NULL || *listaClientes == NULL){
+        return;
+    }
+
+    Cliente * anterior = NULL;
+    Cliente * atual = *listaClientes;
+
+    //Percorre todos os itens existentes da lista de clientes.
+    while(atual->proximo != NULL){
+        //Compara o user do cliente atual com o buscado.
+        if(strcmp(atual->registro.user, usuario) == 0){
+            //Se o endereço buscado foi o primeiro item, então a lista começa com o proximo do atual.
+            if(anterior == NULL){
+                *listaClientes = atual->proximo;
             }
+            //Se o endereço buscado não for o primeiro item, o item anterior tem o próximo do atual como sucessor.
+            else{
+                anterior->proximo = atual->proximo;
+            }
+            //Libera o nó atual.
+            free(atual);
+            break;
         }
-        cliente_anterior = cliente_atual;
-        cliente_atual = cliente_atual->proximo;
-        cliente_sucessor = cliente_atual->proximo;
+
+        anterior = atual;
+        atual = atual->proximo;
     }
 }

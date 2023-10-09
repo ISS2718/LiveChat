@@ -32,6 +32,6 @@ int existeEnderecoLista(struct sockaddr_in endereco, ListaClientes * listaClient
 InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes);
 Cliente * retornaClientePorEndereco(struct sockaddr_in endereco, ListaClientes * listaClientes);
 Cliente * retornaClientePorUsuario(char * usuario, ListaClientes * listaClientes);
-void removeListaPorUsuario(char * usuario, ListaClientes * listaClientes);
-void removeListaPorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes);
+void removeClientePorUsuario(char * usuario, ListaClientes * listaClientes);
+void removeClientePorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes);
 #endif
