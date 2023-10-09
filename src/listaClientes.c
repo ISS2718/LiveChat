@@ -16,6 +16,52 @@ ListaClientes * criaListaClientes(){
     return listaClientes;
 }
 
+InfoCliente criaRegistroCliente(char * infoGeral){
+
+    int tamanho = strlen(infoGeral);
+    int j = -1;
+    int a = 0;
+    char mRegistro[2][64];
+
+    for(int i = 0; infoGeral[i] != '\n'; i++){
+        if(infoGeral[i] == CODIGO_REGISTRO){
+            j++;
+            if(j>=2)
+                break;
+            a = 0;
+        }
+        else{
+            mRegistro[j][a] = infoGeral[i];
+            mRegistro[j][a+1] = '\0';
+            a++;
+        }
+    }
+
+
+    InfoCliente infoCliente;
+    if(j == -1){ //A entrada não foi codigo de registro.
+        
+        strcpy(infoCliente.nome, "\0");
+        strcpy(infoCliente.user, "\0");
+        infoCliente.moderador = -1;
+        infoCliente.cor = -1;
+    }
+    else{
+        strcpy(infoCliente.nome, mRegistro[0]);
+        strcat(infoCliente.nome, "\0");
+
+        strcpy(infoCliente.user, mRegistro[1]);
+        strcat(infoCliente.user, "\0");
+        srand(time(NULL)%7);
+        infoCliente.cor = rand()%10;
+        infoCliente.moderador = 0;
+        infoCliente.mute = 0;
+    }
+
+    return infoCliente;
+
+}
+
 void liberaListaClientes(ListaClientes * listaClientes){
     if(listaClientes != NULL){
         Cliente * cliente;
@@ -119,4 +165,96 @@ int enderecosIguais(struct sockaddr_in A, struct sockaddr_in B){
         return 1;
     
     return 0;
+}
+
+Cliente * retornaClientePorUsuario(char * usuario, ListaClientes * listaClientes){
+    Cliente * cliente = *listaClientes;
+    while(cliente != NULL){
+        if(strcmp(cliente->registro.user, usuario) == 0)
+            return cliente;
+        cliente = cliente->proximo;
+    }
+    return NULL;
+}
+
+InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes){
+    InfoCliente infoCliente;
+    strcat(infoCliente.nome, "\0");
+    strcat(infoCliente.user, "\0");
+    infoCliente.moderador = -1;
+    
+    Cliente * cliente = *listaClientes;
+    while(cliente!=NULL){
+        struct sockaddr_in endClienteLista = cliente->endereco;
+        int bClientesIguais = enderecosIguais(endCliente, endClienteLista);
+        if(bClientesIguais){
+            infoCliente = cliente->registro;
+            return infoCliente;
+        }
+            
+        cliente = cliente->proximo;
+    }
+
+    printf(CLIENTE_NAO_ENCONTRADO);
+    return infoCliente;
+}
+
+void removeListaPorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes) {
+    Cliente * cliente_anterior = NULL;
+    Cliente * cliente_atual = *listaClientes;
+    Cliente * cliente_sucessor = cliente_atual->proximo;
+    while(cliente_atual!=NULL){
+        struct sockaddr_in endClienteLista = cliente_atual->endereco;
+        int bClientesIguais = enderecosIguais(endCliente, endClienteLista);
+        if(bClientesIguais){
+            if(cliente_anterior == NULL) {
+                if(cliente_sucessor == NULL) {
+                    free(cliente_atual);
+                } else {
+                    cliente_atual->registro = cliente_sucessor->registro;
+                    cliente_atual->proximo = cliente_sucessor->proximo;
+                    free(cliente_sucessor);
+                }
+            } else {
+                if(cliente_sucessor == NULL) {
+                    cliente_anterior->proximo = NULL;
+                } else {
+                    cliente_anterior->proximo = cliente_sucessor;
+                }
+                free(cliente_atual);
+            }
+        }
+        cliente_anterior = cliente_atual;
+        cliente_atual = cliente_atual->proximo;
+        cliente_sucessor = cliente_atual->proximo;
+    }
+}
+
+void removeListaPorUsuario(char * usuario, ListaClientes * listaClientes) {
+    Cliente * cliente_anterior = NULL;
+    Cliente * cliente_atual = *listaClientes;
+    Cliente * cliente_sucessor = cliente_atual->proximo;
+    while(cliente_atual != NULL){
+        if(strcmp(cliente_atual->registro.user, usuario) == 0) {
+            if(cliente_anterior == NULL) {
+                if(cliente_sucessor == NULL) {
+                    free(cliente_atual);
+                } else {
+                    cliente_atual->registro = cliente_sucessor->registro;
+                    cliente_atual->proximo = cliente_sucessor->proximo;
+                    free(cliente_sucessor);
+                }
+            } else {
+                if(cliente_sucessor == NULL) {
+                    cliente_anterior->proximo = NULL;
+                } else {
+                    cliente_anterior->proximo = cliente_sucessor;
+                }
+                free(cliente_atual);
+            }
+        }
+        cliente_anterior = cliente_atual;
+        cliente_atual = cliente_atual->proximo;
+        cliente_sucessor = cliente_atual->proximo;
+    }
 }

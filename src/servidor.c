@@ -34,7 +34,7 @@ void enviaMensagemTodos(char mensagem[TAM_MSG], struct sockaddr_in mensageiro, L
 InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes);
 int enviaMensagemCliente(Cliente * cliente, char mensagem[TAM_MSG]);
 Cliente * retornaClientePorUsuario(char usuario[TAM_USER], ListaClientes * listaClientes);
-int verificaExecutaFuncao(char mensagem[TAM_MSG], ListaClientes * listaClientes);
+int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG], ListaClientes * listaClientes);
 
 int main(){
     struct sockaddr_in endServidor;
@@ -109,7 +109,7 @@ int main(){
             }
         }
         else{
-            if(verificaExecutaFuncao(mensagem, listaClientes))
+            if(verificaExecutaFuncao(endMensageiro, mensagem, listaClientes))
                 continue;
 
             InfoCliente registroMensageiro = retornaRegistroPorEndereco(endMensageiro, listaClientes);
@@ -182,52 +182,6 @@ int clienteConectado(struct sockaddr_in endCliente, ListaClientes * listaCliente
     }
 }
 
-InfoCliente criaRegistroCliente(char * infoGeral){
-
-    int tamanho = strlen(infoGeral);
-    int j = -1;
-    int a = 0;
-    char mRegistro[2][64];
-
-    for(int i = 0; infoGeral[i] != '\n'; i++){
-        if(infoGeral[i] == CODIGO_REGISTRO){
-            j++;
-            if(j>=2)
-                break;
-            a = 0;
-        }
-        else{
-            mRegistro[j][a] = infoGeral[i];
-            mRegistro[j][a+1] = '\0';
-            a++;
-        }
-    }
-
-
-    InfoCliente infoCliente;
-    if(j == -1){ //A entrada não foi codigo de registro.
-        
-        strcpy(infoCliente.nome, "\0");
-        strcpy(infoCliente.user, "\0");
-        infoCliente.moderador = -1;
-        infoCliente.cor = -1;
-    }
-    else{
-        strcpy(infoCliente.nome, mRegistro[0]);
-        strcat(infoCliente.nome, "\0");
-
-        strcpy(infoCliente.user, mRegistro[1]);
-        strcat(infoCliente.user, "\0");
-        srand(time(NULL)%7);
-        infoCliente.cor = rand()%10;
-        infoCliente.moderador = 0;
-        infoCliente.mute = 0;
-    }
-
-    return infoCliente;
-
-}
-
 void enviaMensagemTodos(char mensagem[TAM_MSG], struct sockaddr_in mensageiro, ListaClientes * listaClientes){
     Cliente * cliente = *listaClientes;
     
@@ -246,28 +200,6 @@ void enviaMensagemTodos(char mensagem[TAM_MSG], struct sockaddr_in mensageiro, L
     }
 }
 
-InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes){
-    InfoCliente infoCliente;
-    strcat(infoCliente.nome, "\0");
-    strcat(infoCliente.user, "\0");
-    infoCliente.moderador = -1;
-    
-    Cliente * cliente = *listaClientes;
-    while(cliente!=NULL){
-        struct sockaddr_in endClienteLista = cliente->endereco;
-        int bClientesIguais = enderecosIguais(endCliente, endClienteLista);
-        if(bClientesIguais){
-            infoCliente = cliente->registro;
-            return infoCliente;
-        }
-            
-        cliente = cliente->proximo;
-    }
-
-    printf(CLIENTE_NAO_ENCONTRADO);
-    return infoCliente;
-}
-
 int enviaMensagemCliente(Cliente * cliente, char mensagem[TAM_MSG]){
     struct sockaddr_in destino = cliente->endereco;
     int ret = sendto(rSocket, mensagem, strlen(mensagem), 0, (struct sockaddr_in *) &destino, sizeof(struct sockaddr));
@@ -278,17 +210,7 @@ int enviaMensagemCliente(Cliente * cliente, char mensagem[TAM_MSG]){
     return 0;
 }
 
-Cliente * retornaClientePorUsuario(char usuario[TAM_USER], ListaClientes * listaClientes){
-    Cliente * cliente = *listaClientes;
-    while(cliente != NULL){
-        if(strcmp(cliente->registro.user, usuario) == 0)
-            return cliente;
-        cliente = cliente->proximo;
-    }
-    return NULL;
-}
-
-int verificaExecutaFuncao(char mensagem[TAM_MSG], ListaClientes * listaClientes){
+int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG], ListaClientes * listaClientes){
     char funcao[TAM_MSG];
     funcao[0] = '\0';
     char param1[TAM_MSG];
@@ -350,6 +272,51 @@ int verificaExecutaFuncao(char mensagem[TAM_MSG], ListaClientes * listaClientes)
         //printf("%s\n", cliente->registro.user);
         //enviaMensagemCliente(cliente, param);
         return 1;
+    } else if(strcmp(funcao, FECHAR_CLIENTE) == 0) {
+        InfoCliente desconectado = retornaRegistroPorEndereco(mensageiro, listaClientes);
+        char mensagem[TAM_USER + 50];
+        strcpy(mensagem, "\x1B[31mUsuário: ");
+        strcat(mensagem, desconectado.user);
+        strcat(mensagem, " desconectado\n\0\x1B[39m");
+        enviaMensagemTodos(mensagem, mensageiro, listaClientes);
+        //removeListaPorUsuario(desconectado.user, listaClientes);
+    } else if(strcmp(funcao, FECHAR_SERVIDOR) == 0) {
+        InfoCliente desconectado = retornaRegistroPorEndereco(mensageiro, listaClientes);
+        char mensagem[TAM_USER + 50];
+        if(desconectado.moderador == 1) {
+            strcpy(mensagem, "\x1B[31mModerador: ");
+            strcat(mensagem, desconectado.user);
+            strcat(mensagem, " encerrou o LiveChat\n\0\x1B[39m");
+            enviaMensagemTodos(mensagem, mensageiro, listaClientes);
+            liberaListaClientes(listaClientes);
+            exit(0);
+        } else {
+            strcpy(mensagem, "\x1B[31mUsuário: ");
+            strcat(mensagem, desconectado.user);
+            strcat(mensagem, " desconectado\n\0\x1B[39m");
+            enviaMensagemTodos(mensagem, mensageiro, listaClientes);
+            //removeListaPorUsuario(desconectado.user, listaClientes);
+        }
+    }  else if(strcmp(funcao, MUTE) == 0) {
+        InfoCliente moderador = retornaRegistroPorEndereco(mensageiro, listaClientes);
+        if(moderador.moderador == 1) {
+            Cliente * mutado = retornaClientePorUsuario(param1, listaClientes); 
+            char mensagem[TAM_USER + 50];
+
+            strcpy(mensagem, "\x1B[31mUsuário: ");
+            strcat(mensagem, mutado->registro.user);
+
+            if(strcmp(param2, "true")) {
+                mutado->registro.mute = 1;
+                strcat(mensagem, " mutado\n\0\x1B[39m");
+            } else if(strcmp(param2, "false")) {
+                mutado->registro.mute = 0;
+                strcat(mensagem, " desmutado\n\0\x1B[39m");
+            } 
+        
+            enviaMensagemTodos(mensagem, mensageiro, listaClientes);
+        }
     }
+    
     return 0;
 }
