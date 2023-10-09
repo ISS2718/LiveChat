@@ -277,7 +277,9 @@ int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG],
         char mensagem[TAM_USER + 50];
         strcpy(mensagem, "\x1B[31mUsuário: ");
         strcat(mensagem, desconectado.user);
-        strcat(mensagem, " desconectado\n\0\x1B[39m");
+        strcat(mensagem, " desconectado");
+        strcat(mensagem, RESET);
+        strcat(mensagem, " \n\0");
         enviaMensagemTodos(mensagem, mensageiro, listaClientes);
         //removeListaPorUsuario(desconectado.user, listaClientes);
     } else if(strcmp(funcao, FECHAR_SERVIDOR) == 0) {
@@ -286,14 +288,18 @@ int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG],
         if(desconectado.moderador == 1) {
             strcpy(mensagem, "\x1B[31mModerador: ");
             strcat(mensagem, desconectado.user);
-            strcat(mensagem, " encerrou o LiveChat\n\0\x1B[39m");
+            strcat(mensagem, " encerrou o LiveChat");
+            strcat(mensagem, RESET);
+            strcat(mensagem, " \n\0");
             enviaMensagemTodos(mensagem, mensageiro, listaClientes);
             liberaListaClientes(listaClientes);
             exit(0);
         } else {
             strcpy(mensagem, "\x1B[31mUsuário: ");
             strcat(mensagem, desconectado.user);
-            strcat(mensagem, " desconectado\n\0\x1B[39m");
+            strcat(mensagem, " desconectado");
+            strcat(mensagem, RESET);
+            strcat(mensagem, " \n\0");
             enviaMensagemTodos(mensagem, mensageiro, listaClientes);
             //removeListaPorUsuario(desconectado.user, listaClientes);
         }
@@ -308,10 +314,14 @@ int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG],
 
             if(strcmp(param2, "true")) {
                 mutado->registro.mute = 1;
-                strcat(mensagem, " mutado\n\0\x1B[39m");
+                strcat(mensagem, " mutado");
+                strcat(mensagem, RESET);
+                strcat(mensagem, " \n\0");
             } else if(strcmp(param2, "false")) {
                 mutado->registro.mute = 0;
-                strcat(mensagem, " desmutado\n\0\x1B[39m");
+                strcat(mensagem, " desmutado");
+                strcat(mensagem, RESET);
+                strcat(mensagem, " \n\0");
             } 
         
             enviaMensagemTodos(mensagem, mensageiro, listaClientes);
