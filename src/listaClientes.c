@@ -167,6 +167,22 @@ int enderecosIguais(struct sockaddr_in A, struct sockaddr_in B){
     return 0;
 }
 
+Cliente * retornaClientePorEndereco(struct sockaddr_in endereco, ListaClientes * listaClientes){
+    Cliente * cliente = *listaClientes;
+    while(cliente!=NULL){
+        struct sockaddr_in endClienteLista = cliente->endereco;
+        int bClientesIguais = enderecosIguais(endereco, endClienteLista);
+        if(bClientesIguais){
+            return cliente;
+        }
+            
+        cliente = cliente->proximo;
+    }
+
+    printf(CLIENTE_NAO_ENCONTRADO);
+    return NULL;
+}
+
 Cliente * retornaClientePorUsuario(char * usuario, ListaClientes * listaClientes){
     Cliente * cliente = *listaClientes;
     while(cliente != NULL){

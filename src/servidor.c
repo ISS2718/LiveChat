@@ -31,10 +31,7 @@ InfoCliente criaRegistroCliente(char * infoGeral);
 int clienteConectado(struct sockaddr_in endCliente, ListaClientes * listaClientes);
 int conectarCliente(struct sockaddr_in endCliente, InfoCliente registro, ListaClientes * listaClientes);
 void enviaMensagemTodos(char mensagem[TAM_MSG], struct sockaddr_in mensageiro, ListaClientes * listaClientes);
-InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes);
 int enviaMensagemCliente(Cliente * cliente, char mensagem[TAM_MSG]);
-Cliente * retornaClientePorUsuario(char usuario[TAM_USER], ListaClientes * listaClientes);
-Cliente * retornaClientePorEndereco(struct sockaddr_in endereco, ListaClientes * listaClientes);
 int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG], ListaClientes * listaClientes);
 
 int main(){

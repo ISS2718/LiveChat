@@ -30,6 +30,7 @@ int enderecosIguais(struct sockaddr_in A, struct sockaddr_in B);
 int existeClienteLista(InfoCliente registro, ListaClientes * listaClientes);
 int existeEnderecoLista(struct sockaddr_in endereco, ListaClientes * listaClientes);
 InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes);
+Cliente * retornaClientePorEndereco(struct sockaddr_in endereco, ListaClientes * listaClientes);
 Cliente * retornaClientePorUsuario(char * usuario, ListaClientes * listaClientes);
 void removeListaPorUsuario(char * usuario, ListaClientes * listaClientes);
 void removeListaPorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes);
