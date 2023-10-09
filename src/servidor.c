@@ -32,6 +32,9 @@ int clienteConectado(struct sockaddr_in endCliente, ListaClientes * listaCliente
 int conectarCliente(struct sockaddr_in endCliente, InfoCliente registro, ListaClientes * listaClientes);
 void enviaMensagemTodos(char mensagem[TAM_MSG], struct sockaddr_in mensageiro, ListaClientes * listaClientes);
 InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes);
+int enviaMensagemCliente(Cliente * cliente, char mensagem[TAM_MSG]);
+Cliente * retornaClientePorUsuario(char usuario[TAM_USER], ListaClientes * listaClientes);
+int verificaExecutaFuncao(char mensagem[TAM_MSG], ListaClientes * listaClientes);
 
 int main(){
     struct sockaddr_in endServidor;
@@ -105,7 +108,10 @@ int main(){
                 enviaMensagemTodos(statusCliente, endMensageiro, listaClientes);
             }
         }
-        else {
+        else{
+            if(verificaExecutaFuncao(mensagem, listaClientes))
+                continue;
+
             InfoCliente registroMensageiro = retornaRegistroPorEndereco(endMensageiro, listaClientes);
             
             char mensagemCompleta[TAM_MSG];
@@ -183,7 +189,7 @@ InfoCliente criaRegistroCliente(char * infoGeral){
     int a = 0;
     char mRegistro[2][64];
 
-    for(int i = 0; i < strlen(infoGeral); i++){
+    for(int i = 0; infoGeral[i] != '\n'; i++){
         if(infoGeral[i] == CODIGO_REGISTRO){
             j++;
             if(j>=2)
@@ -260,4 +266,90 @@ InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, ListaClien
 
     printf(CLIENTE_NAO_ENCONTRADO);
     return infoCliente;
+}
+
+int enviaMensagemCliente(Cliente * cliente, char mensagem[TAM_MSG]){
+    struct sockaddr_in destino = cliente->endereco;
+    int ret = sendto(rSocket, mensagem, strlen(mensagem), 0, (struct sockaddr_in *) &destino, sizeof(struct sockaddr));
+    if(ret == -1){
+        fprintf(stderr, "Nao foi possivel enviar mensagem ao endereco %d.", destino.sin_addr.s_addr);
+        return -1;
+    }
+    return 0;
+}
+
+Cliente * retornaClientePorUsuario(char usuario[TAM_USER], ListaClientes * listaClientes){
+    Cliente * cliente = *listaClientes;
+    while(cliente != NULL){
+        if(strcmp(cliente->registro.user, usuario) == 0)
+            return cliente;
+        cliente = cliente->proximo;
+    }
+    return NULL;
+}
+
+int verificaExecutaFuncao(char mensagem[TAM_MSG], ListaClientes * listaClientes){
+    char funcao[TAM_MSG];
+    funcao[0] = '\0';
+    char param1[TAM_MSG];
+    param1[0] = '\0';
+    char param2[TAM_MSG];
+    param2[0] = '\0';
+
+    int bFuncao = 0;
+    int bParam1 = 0;
+    int bParam2 = 0;
+
+    int j = 0;
+    for(int i = 0; mensagem[i] != '\n' && mensagem[i] != '\0'; i++){
+        if(mensagem[i] == '/'){
+            bFuncao = 1;
+            bParam1 = 0;
+            bParam2 = 0;
+        }
+        else if (mensagem[i] == ' '){
+            bFuncao = 0;
+            if(bParam1 == 0 && bParam2 == 0){
+                bParam1 = 1;
+                bParam2 = 0;
+                j=0;
+                continue;
+            }
+            else if(bParam2 == 0 && bParam1 == 1){
+                bParam1 = 0;
+                bParam2 = 1;
+                j=0;
+                continue;
+            }
+        }
+
+        if(bFuncao){
+            funcao[j] = mensagem[i];
+            funcao[j+1] = '\0';
+            j++;
+        }
+        if(bParam1){
+            param1[j] = mensagem[i];
+            param1[j+1] = '\0';
+            j++;
+        }
+        if(bParam2){
+            param2[j] = mensagem[i];
+            param2[j+1] = '\0';
+            j++;
+        }
+    }
+
+    printf(SISTEMA "FUNCAO: %s\n", funcao);
+    printf(SISTEMA "PARAMETRO 1: %s\n", param1);
+    printf(SISTEMA "PARAMETRO 2: %s\n", param2);
+
+    
+    if(strcmp(funcao, SUSSURRO) == 0){
+        //Cliente * cliente = retornaClientePorUsuario(param,listaClientes);
+        //printf("%s\n", cliente->registro.user);
+        //enviaMensagemCliente(cliente, param);
+        return 1;
+    }
+    return 0;
 }

@@ -10,5 +10,5 @@
 #define ERROR "/ERROR\n"
 #define FECHAR_CLIENTE "/QUIT\n"
 #define FECHAR_SERVIDOR "/SEVERKILL\n"
-
+#define SUSSURRO "/SUSSURRO"
 #endif
