@@ -6,6 +6,9 @@
 #define TAM_NOME 64
 #define TAM_USER 32
 
+#define NUM_CORES_USERS 9
+#define COR_MOD 10;
+
 #define CODIGO_REGISTRO '#'
 #define ERROR "/ERROR"
 

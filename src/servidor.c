@@ -12,7 +12,6 @@
 
 const char cores[12][9] = {
     {"\x1B[32m"}, //VERDE
-    {"\x1B[34m"}, //AZUL
     {"\x1B[35m"}, //MAGENTA
     {"\x1B[36m"}, //CIANO
     {"\x1B[91m"}, //VERMELHO CLARO
@@ -21,7 +20,9 @@ const char cores[12][9] = {
     {"\x1B[94m"}, //AZUL CLARO
     {"\x1B[95m"}, //MAGENTA CLARO
     {"\x1B[96m"}, //CIANO CLARO
+    
     {"\x1B[37m"}, //BRANCO
+    {"\x1B[34m"}, //AZUL (MOD)
     {"\x1B[39m"}  //RESET
 };
 
@@ -96,6 +97,7 @@ int main(){
             
             if(strcmp(infoCliente.user, MODERADOR1) == 0 || strcmp(infoCliente.user, MODERADOR2) == 0){
                 infoCliente.moderador = 1;
+                infoCliente.cor = COR_MOD;
             }
             
             if(conectarCliente(endMensageiro, infoCliente, listaClientes)){
@@ -166,6 +168,15 @@ int conectarCliente(struct sockaddr_in endCliente, InfoCliente registro, ListaCl
     }
 
     insereListaClientes(registro, endCliente, listaClientes);
+
+    char mensagem[TAM_MSG];
+    strcpy(mensagem, cores[0]);
+    strcat(mensagem, registro.user);
+    strcat(mensagem, " entrou no servidor!");
+    strcat(mensagem, RESET);
+    strcat(mensagem, "\n\0");
+
+    enviaMensagemTodos(mensagem, endCliente, listaClientes);
 
     printf(SISTEMA "%s (%s): ", registro.nome, registro.user);
     printf(SUCESSO_CONEXAO_CLIENTE);
@@ -267,7 +278,7 @@ int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG],
     printf(SISTEMA "PARAMETRO 1: %s\n", param1);
     printf(SISTEMA "PARAMETRO 2: %s\n", param2);
 
-    
+    //ENVIA UMA MENSAGEM PRIVADA A UM USUÁRIO.
     if(strcmp(funcao, SUSSURRO) == 0){
         Cliente * clienteMensageiro = retornaClientePorEndereco(mensageiro, listaClientes);
         Cliente * cliente = retornaClientePorUsuario(param1,listaClientes);
@@ -299,6 +310,7 @@ int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG],
         enviaMensagemCliente(cliente, mensagemCompleta);
         return 1;
     }
+    //CONTROLA O PODER DE MOD DOS USUÁRIOS.
     else if(strcmp(funcao, MOD) == 0){
         Cliente * clienteMensageiro = retornaClientePorEndereco(mensageiro, listaClientes);
 
@@ -323,45 +335,105 @@ int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG],
 
             return 1;
         }
-        
+
+        char msg[TAM_MSG];
+        bzero(msg, TAM_MSG);
+
+        //Alvo não tem poder de moderador.
         if(cliente->registro.moderador == 0){
-            cliente->registro.moderador = 1;
-            char msg[TAM_MSG];
-            strcpy(msg, AMARELO);
-            strcat(msg, clienteMensageiro->registro.user);
-            strcat(msg, " te deu poder de moderador!\n");
-            strcat(msg, RESET);
-            strcat(msg, "\0");
-            enviaMensagemCliente(cliente, msg);
-            printf(SISTEMA "usuario %s deu poder de moderador a %s.\n", clienteMensageiro->registro.user, cliente->registro.user);
+            //Caso o alvo não tenha poder de moderador e tenta-se dá-lo poder.
+            if(strcmp(param2, "true") == 0){
+                cliente->registro.moderador = 1;
+                cliente->registro.cor = COR_MOD;
+                strcpy(msg, AMARELO);
+                strcat(msg, clienteMensageiro->registro.user);
+                strcat(msg, " deu poder de moderador a ");
+                strcat(msg, cliente->registro.user);
+                strcat(msg, ".");
+                strcat(msg, RESET);
+                strcat(msg, "\n\0");
+                enviaMensagemTodos(msg, mensageiro, listaClientes);
+
+                strcpy(msg, AMARELO);
+                strcat(msg, "você deu poder de moderador a ");
+                strcat(msg, cliente->registro.user);
+                strcat(msg, RESET);
+                strcat(msg, ".");
+                strcat(msg, " \n\0");
+                enviaMensagemCliente(clienteMensageiro, msg);
+                printf(SISTEMA "usuario %s deu poder de moderador a %s.\n", clienteMensageiro->registro.user, cliente->registro.user);
+        
+            }
+            //Caso o alvo não tenha poder de moderador e tenta-se retirá-lo poder.
+            else if(strcmp(param2, "false") == 0){
+                char msg[TAM_MSG];
+                strcpy(msg, ERRO);
+                strcat(msg, cliente->registro.user);
+                strcat(msg, " não é moderador.\n");
+                strcat(msg, RESET);
+                strcat(msg, "\0");
+                enviaMensagemCliente(clienteMensageiro, msg);
+                printf(SISTEMA "usuario %s tentou retirar poder de moderador de %s.\n", clienteMensageiro->registro.user, cliente->registro.user);
+            }
         }
+        //Alvo tem poder de moderador.
         else{
-            char msg[TAM_MSG];
-            strcpy(msg, AMARELO);
-            strcat(msg, cliente->registro.user);
-            strcat(msg, " ja possui poder de moderador.\n");
-            strcat(msg, RESET);
-            strcat(msg, "\0");
-            enviaMensagemCliente(clienteMensageiro, msg);
-            printf(SISTEMA "usuario %s tentou dar poder de moderador a %s.\n", clienteMensageiro->registro.user, cliente->registro.user);
+            //Caso o alvo já tenha moderador e tenta-se dá-lo poder de moderador.
+            if(strcmp(param2, "true") == 0){
+                char msg[TAM_MSG];
+                strcpy(msg, ERRO);
+                strcat(msg, cliente->registro.user);
+                strcat(msg, " ja possui poder de moderador.");
+                strcat(msg, RESET);
+                strcat(msg, "\n\0");
+                enviaMensagemCliente(clienteMensageiro, msg);
+                printf(SISTEMA "usuario %s tentou dar poder de moderador a %s.\n", clienteMensageiro->registro.user, cliente->registro.user);
+            }
+            //Caso o alvo tenha poder de moderador e tenta-se tirá-lo o poder.
+            else if (strcmp(param2, "false") == 0 ){
+                cliente->registro.moderador = 0;
+                srand(time(NULL)%7);
+                cliente->registro.cor = rand() % NUM_CORES_USERS;
+                strcpy(msg, AMARELO);
+                strcat(msg, clienteMensageiro->registro.user);
+                strcat(msg, " retirou o poder de moderador de ");
+                strcat(msg, cliente->registro.user);
+                strcat(msg, ".");
+                strcat(msg, RESET);
+                strcat(msg, "\n\0");
+                enviaMensagemTodos(msg, mensageiro, listaClientes);
+
+                strcpy(msg, AMARELO);
+                strcat(msg, "você retirou poder de moderador de ");
+                strcat(msg, cliente->registro.user);
+                strcat(msg, ".");
+                strcat(msg, RESET);
+                strcat(msg, " \n\0");
+                enviaMensagemCliente(clienteMensageiro, msg);
+
+                printf(SISTEMA "usuario %s retirou poder de moderador a %s.\n", clienteMensageiro->registro.user, cliente->registro.user);
+            }
         }
         
         return 1;
     } 
+    //CLIENTE SAI DO SERVIDOR.
     else if(strcmp(funcao, FECHAR_CLIENTE) == 0) {
         Cliente * clienteMensageiro = retornaClientePorEndereco(mensageiro, listaClientes);
+        printf(SISTEMA "removendo usuario %s...\n", clienteMensageiro->registro.user);
         char mensagem[TAM_USER + 50];
         strcpy(mensagem, "\x1B[31mUsuário: ");
         strcat(mensagem, clienteMensageiro->registro.user);
         strcat(mensagem, " desconectado");
         strcat(mensagem, RESET);
         strcat(mensagem, " \n\0");
-        enviaMensagemCliente(clienteMensageiro, mensagem);
+        //enviaMensagemCliente(clienteMensageiro, mensagem);
         enviaMensagemTodos(mensagem, mensageiro, listaClientes);
         removeClientePorUsuario(clienteMensageiro->registro.user, listaClientes);
-        
+        printf(SISTEMA "cliente removido.\n");
         return 1;
     } 
+    //CLIENTE FECHA O SERVIDOR.
     else if(strcmp(funcao, FECHAR_SERVIDOR) == 0) {
         Cliente * clienteMensageiro = retornaClientePorEndereco(mensageiro, listaClientes);
         char mensagem[TAM_USER + 50];
@@ -404,27 +476,75 @@ int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG],
     }
     //FUNÇÃO QUE MUTA O USUÁRIO SELECIONADO.
     else if(strcmp(funcao, MUTE) == 0) {
-        InfoCliente moderador = retornaRegistroPorEndereco(mensageiro, listaClientes);
-        if(moderador.moderador == 1) {
-            Cliente * mutado = retornaClientePorUsuario(param1, listaClientes); 
-            char mensagem[TAM_USER + 50];
+        Cliente * clienteMensageiro = retornaClientePorEndereco(mensageiro, listaClientes); 
+        Cliente * mutado = retornaClientePorUsuario(param1, listaClientes); 
+        if(clienteMensageiro->registro.moderador == 1) {
+            
 
-            strcpy(mensagem, "\x1B[31mUsuário: ");
-            strcat(mensagem, mutado->registro.user);
+            //Se deseja-se MUTAR o usuario.
+            if(strcmp(param2, "true") == 0) {
+                //Se o usuário está DESMUTADO.
+                if(mutado->registro.mute == 0){
+                    mutado->registro.mute = 1;
+                    char mensagem[TAM_USER + 50];
+                    strcpy(mensagem, AMARELO);
+                    strcat(mensagem, mutado->registro.user);
+                    strcat(mensagem, " foi mutado."); 
+                    strcat(mensagem, RESET);
+                    strcat(mensagem, " \n\0");
+                    enviaMensagemTodos(mensagem, mensageiro, listaClientes);
 
-            if(strcmp(param2, "true")) {
-                mutado->registro.mute = 1;
-                strcat(mensagem, " mutado");
-                strcat(mensagem, RESET);
-                strcat(mensagem, " \n\0");
-            } else if(strcmp(param2, "false")) {
-                mutado->registro.mute = 0;
-                strcat(mensagem, " desmutado");
-                strcat(mensagem, RESET);
-                strcat(mensagem, " \n\0");
+                    strcpy(mensagem, AMARELO);
+                    strcat(mensagem, "você mutou ");
+                    strcat(mensagem, mutado->registro.user);
+                    strcat(mensagem, RESET);
+                    strcat(mensagem, " \n\0");
+                    enviaMensagemCliente(clienteMensageiro, mensagem);
+                }
+                //Se o usuário está MUTADO.
+                else{
+                    char mensagem[TAM_USER + 50];
+                    strcpy(mensagem, ERRO);
+                    strcat(mensagem, mutado->registro.user);
+                    strcat(mensagem, " já está mutado.");
+                    strcat(mensagem, " \n\0");
+                    enviaMensagemCliente(clienteMensageiro, mensagem);
+                }
+                                
             } 
-        
-            enviaMensagemTodos(mensagem, mensageiro, listaClientes);
+            //Se deseja-se DESMUTAR o usuario.
+            else if(strcmp(param2, "false") == 0) {
+                //Se o usuário está DESMUTADO
+                if(mutado->registro.mute == 0){
+                    char mensagem[TAM_USER + 50];
+                    strcpy(mensagem, ERRO);
+                    strcat(mensagem, mutado->registro.user);
+                    strcat(mensagem, " não está mutado."); 
+                    strcat(mensagem, " \n\0");
+                    enviaMensagemCliente(clienteMensageiro, mensagem);
+                }
+                //Se o usuário está MUTADO.
+                else{
+                    mutado->registro.mute = 0;
+                    char mensagem[TAM_USER + 50];
+                    strcpy(mensagem, AMARELO);
+                    strcat(mensagem, mutado->registro.user);
+                    strcat(mensagem, " foi desmutado.");
+                    strcat(mensagem, RESET);
+                    strcat(mensagem, " \n\0");
+                    enviaMensagemTodos(mensagem, mensageiro, listaClientes);
+
+                    strcpy(mensagem, AMARELO);
+                    strcat(mensagem, "você desmutou ");
+                    strcat(mensagem, mutado->registro.user);
+                    strcat(mensagem, RESET);
+                    strcat(mensagem, " \n\0");
+                    enviaMensagemCliente(clienteMensageiro, mensagem);
+                }
+                               
+            } 
+            
+            return 1;
         }
     }
     //FUNÇÃO QUE IMPRIME TODOS OS USUÁRIOS.
@@ -451,6 +571,9 @@ int verificaExecutaFuncao(struct sockaddr_in mensageiro, char mensagem[TAM_MSG],
             strcpy(mensagem, "- ");
             strcat(mensagem, cores[cliente->registro.cor]);
             strcat(mensagem, cliente->registro.user);
+            if(cliente->registro.moderador == 1){
+                strcat(mensagem, " (moderador)");
+            }
             strcat(mensagem, RESET);
             strcat(mensagem, "\n\0");
             enviaMensagemCliente(clienteMensageiro, mensagem);

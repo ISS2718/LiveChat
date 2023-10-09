@@ -30,7 +30,7 @@ void* enviar() {
 
         // Recebe do usuário a mensagem a ser enviada para o servidor
         while(fgets(bufferEnviar, TAM_MSG, stdin) == NULL);
-
+        tirabarran(bufferEnviar);
         // Enviando mensagem para servidor utilizando o socket
         if(send(socket_c, bufferEnviar, strlen(bufferEnviar), 0) == -1) {
             // Se não conseguiu enviar...
@@ -38,7 +38,7 @@ void* enviar() {
             // Printa erro de envio
             printf(ERRO"Não foi possível enviar mensagem!\n"); 
             break;
-        } else if((strcmp(bufferEnviar, FECHAR_CLIENTE) == 0) || (strcmp(bufferEnviar, FECHAR_SERVIDOR) == 0)) {
+        } else if((strcmp(bufferEnviar, FECHAR_CLIENTE) == 0)) {
             // Se o que enviou foi um código de saída...
             
             // Printa que está saindo
@@ -77,7 +77,8 @@ void* receber() {
                 printf(ERRO"O usuário %s já está sendo utlizado, mude para conectar.\n", cliente.user);
                 break;
                 
-            } else {
+            } 
+            else {
                 printf("%s", bufferReceber);
             }
         }
@@ -131,9 +132,10 @@ int main(){
         printf(ERRO"Não foi possível obter as informações do socket_c.\n");
         return 1;
     }
-
+    printf("\n");
     printf(AMARELO"Nome Servidor:"RESET"%s\n", servidor->h_name);
     printf(AMARELO"Endereço IP do Servidor:"RESET"%s\n", inet_ntoa((struct in_addr)*((struct in_addr *)servidor->h_addr)));
+    printf("\n");
 
 
     // Criando e configurando o socket como IPV4, UDP e IPROTO_UDP

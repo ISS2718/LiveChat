@@ -54,7 +54,7 @@ InfoCliente criaRegistroCliente(char * infoGeral){
         strcpy(infoCliente.user, mRegistro[1]);
         strcat(infoCliente.user, "\0");
         srand(time(NULL)%7);
-        infoCliente.cor = rand()%10;
+        infoCliente.cor = rand() % NUM_CORES_USERS;
         infoCliente.moderador = 0;
         infoCliente.mute = 0;
     }
@@ -171,9 +171,11 @@ int enderecosIguais(struct sockaddr_in A, struct sockaddr_in B){
 Cliente * retornaClientePorEndereco(struct sockaddr_in endereco, ListaClientes * listaClientes){
     Cliente * cliente = *listaClientes;
     while(cliente!=NULL){
+        printf(SISTEMA "procurando por %d na lista de clientes...\n", endereco.sin_addr.s_addr);
         struct sockaddr_in endClienteLista = cliente->endereco;
         int bClientesIguais = enderecosIguais(endereco, endClienteLista);
         if(bClientesIguais){
+            printf(SISTEMA "usuario de endereço %d encontrado: %s\n", endereco.sin_addr.s_addr, cliente->registro.user);
             return cliente;
         }
             
