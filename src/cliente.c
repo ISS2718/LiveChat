@@ -142,7 +142,6 @@ int main(){
         printf(ERRO"Não foi possível criar o descritor do socket.\n");
         return 1;
     }
-    printf("%d", socket_c);
 
     // Guardando as configurações do socket e o endereço de conexão
     struct sockaddr_in socket_endereço;
@@ -154,9 +153,9 @@ int main(){
     memset(&(socket_endereço.sin_zero), '\0', 8); // utlimos 8 bytes == 0
 
     // Realizando a conexão com o servidor
-    if(connect(socket_c, (struct sockaddr*) &socket_endereço, sizeof(struct sockaddr))) {
-        close(socket_c);
+    if(connect(socket_c, (struct sockaddr*) &socket_endereço, sizeof(struct sockaddr)) == -1) {
         printf(ERRO"Não foi possível conetctar no servidor.\n");
+        close(socket_c);
         return 1;
     }
 
