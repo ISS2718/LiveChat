@@ -1,10 +1,5 @@
 #include "cliente.h"
 
-/**
- * @def Função de enviar mensagens para servidor.
- * 
- * @note Deve ser utlizada em uma thread; 
- */
 void* enviar(void * arg) {
      ParametrosPthreads * p = (ParametrosPthreads *) arg;
 
@@ -38,11 +33,6 @@ void* enviar(void * arg) {
     pthread_exit(NULL);
 }
 
-/**
- * @def Função de receber mensagens para servidor.
- * 
- * @note Deve ser utlizada em uma thread; 
- */
 void* receber(void * arg) {
     ParametrosPthreads * p = (ParametrosPthreads *) arg;
 

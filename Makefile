@@ -7,6 +7,7 @@ DBFLAGS := -Wall -g3
 COMMON_FLAGS := -march=native -O3 $(DEBUG)
 
 all: includes servidor cliente
+	clear
 
 allCliente: cliente runCliente
 
@@ -22,10 +23,10 @@ cliente: includes $(CLIENTE)/main.c $(CLIENTE)/cliente.c
 	$(MAKE) -C $(CLIENTE) all
 
 runCliente:
-	./cliente.out
+	$(CLIENTE)/cliente.out
 
 runServidor:
-	./servidor.out
+	$(SERVIDOR)/servidor.out
 
 clear:
 	$(MAKE) -C $(INCLUDES) clear

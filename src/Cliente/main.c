@@ -16,50 +16,60 @@
 #include "../Includes/listaClientes.h"
 
 int main(){
-    int socket_c;
+    // Variável de informações do cliente.
     InfoCliente cliente;
     
+    // Buffer para envio do nome e usuário para servidor .
     char usr_envia[TAM_NOME + TAM_USER + 1];
+    
+    // Buffer para o ip do servidor.
+    char servidor_ip[TAM_IP];
 
+    // Zera todos os buffers (strings).
     bzero(cliente.nome, TAM_NOME);
     bzero(cliente.user, TAM_USER);
+    bzero(servidor_ip, TAM_IP);
     bzero(usr_envia, TAM_NOME + TAM_USER + 1);
 
     
-    //**********************CRIAR MACRO TAMANHO IP**********************
-    char servidor_ip[TAM_NOME];
 
-    // pegando informações do usuário
-    printf(AMARELO"Digite seu nome:\n"RESET);
+    // Requisita nome do usuário
+    printf(AMARELO"Digite seu nome real (tam_máx %d):\n"RESET, TAM_NOME - 1);
     while(fgets(cliente.nome, TAM_NOME, stdin) == NULL){
         printf(ERRO"Digite novamente o seu nome\n");
     }
 
-    printf(AMARELO"Digite seu usuário:\n"RESET);
+    // Requisita nome de usuário.
+    printf(AMARELO"Digite seu usuário (tam_máx %d):\n"RESET, TAM_USER - 1);
     while(fgets(cliente.user, TAM_USER, stdin) == NULL){
         printf(ERRO"Digite novamente o seu usuário\n");
     }
 
+    // Trira o "\n" das Strings recebidas pelo fgets
     tirabarran(cliente.nome);
     tirabarran(cliente.user);
 
+    // Monta a String para envio do nome e usuário no padrão #nome#usuário. 
     strcpy(usr_envia, "#");
     strcat(usr_envia, cliente.nome);
     strcat(usr_envia, "#");
     strcat(usr_envia, cliente.user);
     strcat(usr_envia, "\n\0");
 
-    printf(AMARELO"Digite o ip do servidor:\n"RESET);
+    // Requisita ip do servidor (hostname)
+    printf(AMARELO"Digite o ip do servidor (tam_máx %d):\n"RESET, TAM_IP - 1);
     while(!scanf("%s", servidor_ip)) {
         printf(ERRO"Digite novamente o seu usuário\n");
     }
 
-    // pegando informações do servidor
+    // Pegando informações do servidor
     struct hostent *servidor = gethostbyname(servidor_ip);
-    if(servidor == NULL) {        // get the host info
-        printf(ERRO"Não foi possível obter as informações do socket_c.\n");
+    if(servidor == NULL) {
+        // Se não foi possível conseguir as informações do servidor pelo ip recebido, printa erro
+        printf(ERRO"Não foi possível obter as informações do servidor pelo ip recebido.\n");
         return 1;
     }
+    // Se foi possível conseguir as informações do servidor pelo ip recebido, printa informações
     printf("\n");
     printf(AMARELO"Nome Servidor:"RESET"%s\n", servidor->h_name);
     printf(AMARELO"Endereço IP do Servidor:"RESET"%s\n", inet_ntoa((struct in_addr)*((struct in_addr *)servidor->h_addr)));
@@ -67,6 +77,7 @@ int main(){
 
 
     // Criando e configurando o socket como IPV4, UDP e IPROTO_UDP
+    int socket_c;
     if((socket_c = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
         close(socket_c);
         printf(ERRO"Não foi possível criar o descritor do socket.\n");
@@ -96,26 +107,39 @@ int main(){
         return 1;
     }
 
+    // Criando Threads para enviar e receber mensagens.
+
     pthread_t thread_envia, thread_recebe;
     pthread_attr_t confg_thread;
     
-    // criaparâmetros para enviar paras as treads
+    // Cria a estrutura de parâmetros para enviar paras as pthreads.
     ParametrosPthreads p;
     p.cliente = &cliente;
     p.socket_c = &socket_c;
 
+    // Inicializa e configura a thread para ser joinable.
     pthread_attr_init(&confg_thread);
     pthread_attr_setdetachstate(&confg_thread, PTHREAD_CREATE_JOINABLE);
 
-
+    // Cria a Thread de envio.
     pthread_create(&thread_envia, &confg_thread, enviar, (void *) &p);
+
+    // Inicializa e configura a thread para ser não joinable.
+    pthread_attr_init(&confg_thread);
+    pthread_attr_setdetachstate(&confg_thread, PTHREAD_CREATE_DETACHED);
+
+    // Cria a Thread de recebimento.
     pthread_create(&thread_recebe, &confg_thread, receber, (void *) &p);
 
-
+    // Espera a thread a de envio terminar.
     pthread_join(thread_envia, NULL);
+
+    // Encerra a thread de recebimento.
     pthread_cancel(thread_recebe);
 
+    // fecha o socket.
     close(socket_c);
 
+    // Encerra o programa
     return 0;
 }

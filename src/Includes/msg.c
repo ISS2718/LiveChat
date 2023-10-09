@@ -1,6 +1,8 @@
 #include "msg.h"
 
 void tirabarran(char* msg) {
-    int msg_tam = (int) strlen(msg);
-    msg[msg_tam-1] = '\0';
+    // Calcula o tamanho da string
+    int msg_tam = (int) strlen(msg);  
+    // Substitui o último caractere (nova linha) por um caractere nulo
+    msg[msg_tam-1] = '\0';  
 }

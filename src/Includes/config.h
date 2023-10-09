@@ -1,14 +1,69 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+/**
+ * @def PORTA
+ * @brief 
+ *
+ * @note 
+ */
 #define PORTA 8080
+
+/**
+ * @def TAM_MSG
+ * @brief 
+ *
+ * @note 
+ */
 #define TAM_MSG 256
+
+/**
+ * @def COR_MOD
+ * @brief 
+ *
+ * @note 
+ */
 #define TAM_NOME 64
+
+/**
+ * @def TAM_USER
+ * @brief 
+ *
+ * @note 
+ */
 #define TAM_USER 32
 
+/**
+ * @def TAM_IP
+ * @brief 
+ *
+ * @note 
+ */
+#define TAM_IP 16
+
+
+/**
+ * @def NUM_CORES_USERS
+ * @brief 
+ *
+ * @note 
+ */
 #define NUM_CORES_USERS 9
+
+/**
+ * @def COR_MOD
+ * @brief 
+ *
+ * @note 
+ */
 #define COR_MOD 10;
 
+/**
+ * @def CODIGO_REGISTRO
+ * @brief 
+ *
+ * @note 
+ */
 #define CODIGO_REGISTRO '#'
 
 /**

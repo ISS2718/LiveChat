@@ -20,6 +20,16 @@
 #define AMARELO "\x1B[33m"
 #define RESET "\x1B[39m"
 
+/**
+ * @fn void tirabarran(char* msg);
+ * @brief Função para tirar "\n" do final da string.
+ *
+ * Esta função remove o caractere de nova linha ('\n') do final de uma string, obtida pela funação fgets().
+ *
+ * @param msg Um ponteiro para a string que será modificada.
+ *
+ * @note Esta função só tira o '\n' do final da mensagem, isto é, antes do '\0'.
+ */
 void tirabarran(char* msg);
 
 #endif
