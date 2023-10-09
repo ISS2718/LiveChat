@@ -10,6 +10,21 @@
 #include "config.h"
 #include "msg.h"
 
+const char cores[12][9] = {
+    {"\x1B[32m"},
+    {"\x1B[34m"},
+    {"\x1B[35m"},
+    {"\x1B[36m"},
+    {"\x1B[91m"},
+    {"\x1B[92m"},
+    {"\x1B[93m"},
+    {"\x1B[94m"},
+    {"\x1B[95m"},
+    {"\x1B[96m"},
+    {"\x1B[37m"},
+    {"\x1B[39m"}
+};
+
 int rSocket;
 
 InfoCliente criaRegistroCliente(char * infoGeral);
@@ -27,11 +42,11 @@ int main(){
 
     rSocket = socket(AF_INET, SOCK_DGRAM, 0); // Cria um socket UDP;
     if(rSocket == -1){
-        fprintf(stderr, "Erro ao criar o socket.");
-        return -1;
+        printf(ERRO "Erro ao criar o socket.\n");
+        return 1;
     }
 
-    printf("Socket criado!\n");
+    printf(SISTEMA "Socket criado!\n");
 
     endServidor.sin_family = AF_INET;
     endServidor.sin_port = htons(PORTA);
@@ -40,13 +55,13 @@ int main(){
     memset(&(endServidor.sin_zero), '\0', 8);
 
     if(bind(rSocket, (struct sockaddr *) &endServidor, sizeof(struct sockaddr)) == -1){
-        fprintf(stderr, "Erro ao criar o socket.");
+        printf(ERRO "Erro ao criar o socket.\n");
         return -1;
     }
 
     char ip[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &endServidor,ip,INET_ADDRSTRLEN);
-    printf("Socket esta online no IP %s e na porta %d!\n", ip, ntohs(endServidor.sin_port));
+    printf(AVISO"Socket esta online no IP %s e na porta %d!\n", ip, ntohs(endServidor.sin_port));
 
 
     while(1){
@@ -56,15 +71,14 @@ int main(){
         int bytesRecebidos = recvfrom(rSocket,mensagem, TAM_MSG-1,0,(struct sockaddr *) &endMensageiro, (unsigned int *) &tamanhoEndereco);
         
         if(bytesRecebidos == -1){
-            fprintf(stderr, "Erro ao receber mensagem.");
+            printf(ERRO "Erro ao receber mensagem.\n");
             return -1;
         }
 
         if(strcmp(mensagem, "") == 0|| strcmp(mensagem, "\n") == 0 || strcmp(mensagem, " ") == 0)
             continue;
 
-        printf(MENSAGEM);
-        printf("%s", mensagem);
+        printf(MENSAGEM"%s", mensagem);
 
         //Se o cliente não está conectado, as mensagens que chegam são informações do usuário para conectá-lo.
         if(!clienteConectado(endMensageiro, listaClientes)){
@@ -73,8 +87,7 @@ int main(){
             if(infoCliente.moderador == -1)
                 continue;
             
-            printf(SISTEMA);
-            printf("Dados do cliente: \n");
+            printf(SISTEMA "Dados do cliente: \n");
             printf("\t\t NOME: %s\n", infoCliente.nome);
             printf("\t\t USER: %s\n", infoCliente.user);
             printf("\t\t MODERADOR: %d\n", infoCliente.moderador);
@@ -82,7 +95,7 @@ int main(){
             
             
             if(conectarCliente(endMensageiro, infoCliente, listaClientes)){
-                printf("User %s conectado!\n", infoCliente.user);
+                printf(AVISO"User %s conectado!\n", infoCliente.user);
 
                 char statusCliente[TAM_MSG];
                 strcat(statusCliente, infoCliente.user);
@@ -98,15 +111,16 @@ int main(){
             char mensagemCompleta[TAM_MSG];
             bzero(mensagemCompleta, TAM_MSG);
 
+            strcat(mensagemCompleta, cores[registroMensageiro.cor]);
             strcat(mensagemCompleta, registroMensageiro.nome);
             strcat(mensagemCompleta, "(");
             strcat(mensagemCompleta, registroMensageiro.user);
             strcat(mensagemCompleta, "): ");
+            strcat(mensagemCompleta, cores[11]);
             strcat(mensagemCompleta, mensagem);
             strcat(mensagemCompleta, "\n\0");
 
-            printf(MENSAGEM);
-            printf("%s", mensagemCompleta);
+            printf(MENSAGEM"%s", mensagemCompleta);
             enviaMensagemTodos(mensagemCompleta,endMensageiro, listaClientes);
         }
 
@@ -114,12 +128,10 @@ int main(){
 }
 
 int conectarCliente(struct sockaddr_in endCliente, InfoCliente registro, ListaClientes * listaClientes){
-    printf(SISTEMA);
-    printf("Conetando cliente %s!\n", registro.user);
+    printf(SISTEMA "Conetando cliente %s!\n", registro.user);
 
     if(listaClientes == NULL){
-        printf(SISTEMA);
-        printf("nao ha lista de clientes!\n");
+        printf(SISTEMA "Não há lista de clientes!\n");
 
         insereListaClientes(registro, endCliente, listaClientes);
 
@@ -129,13 +141,12 @@ int conectarCliente(struct sockaddr_in endCliente, InfoCliente registro, ListaCl
     }
 
     if(existeClienteLista(registro, listaClientes)){
-        printf(SISTEMA);
-        printf(CLIENTE_JA_CONECTADO);
+        printf(SISTEMA CLIENTE_JA_CONECTADO);
 
         int rMensagem = sendto(rSocket, ERROR, strlen(CLIENTE_JA_CONECTADO), 0, (struct sockaddr *) &endCliente, sizeof(struct sockaddr));
         
         if(rMensagem == -1){
-            fprintf(stderr, ERRO_CONECTAR_CLIENTE);
+            printf(ERRO ERRO_CONECTAR_CLIENTE);
             return -1;
         }
 
@@ -145,19 +156,17 @@ int conectarCliente(struct sockaddr_in endCliente, InfoCliente registro, ListaCl
     insereListaClientes(registro, endCliente, listaClientes);
 
     printf("%s (%s): ", registro.nome, registro.user);
-    printf(SUCESSO_CONEXAO_CLIENTE);
+    printf(SISTEMA SUCESSO_CONEXAO_CLIENTE);
     return 0;
 }
 
 int clienteConectado(struct sockaddr_in endCliente, ListaClientes * listaClientes){    
     if(existeEnderecoLista(endCliente, listaClientes)){
-        printf(SISTEMA);
-        printf("Usuário de IP %d ja esta conectado!\n",endCliente.sin_addr.s_addr);
+        printf(SISTEMA "Usuário de IP %d ja esta conectado!\n",endCliente.sin_addr.s_addr);
         return 1;
     }
     else{
-        printf(SISTEMA);
-        printf("nao ha clientes com o endereco de IP %d conectados.\n",endCliente.sin_addr.s_addr);
+        printf(SISTEMA "nao ha clientes com o endereco de IP %d conectados.\n",endCliente.sin_addr.s_addr);
         return 0;
     }
 }
@@ -216,9 +225,9 @@ void enviaMensagemTodos(char mensagem[TAM_MSG], struct sockaddr_in mensageiro, L
             int ret = sendto(rSocket, mensagem, strlen(mensagem),0, (struct sockaddr *)&cliente->endereco, sizeof(struct sockaddr));
             
             if(ret == -1){
-                fprintf(stderr, "%s (%s): ", cliente->registro.nome, cliente->registro.user);
-                fprintf(stderr, ERRO_MENSAGEM);
-                return;
+                printf(ERRO "%s (%s): ", cliente->registro.nome, cliente->registro.user);
+                printf(ERRO ERRO_MENSAGEM);
+                break;;
             }
         }
         cliente = cliente->proximo;
