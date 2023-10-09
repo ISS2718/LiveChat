@@ -23,11 +23,6 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 char bufferEnviar[TAM_MSG];
 char bufferReceber[TAM_MSG];
 
-void tirabarran(char* msg) {
-    int msg_tam = (int) strlen(msg);
-    msg[msg_tam-1] = '\0';
-}
-
 void* enviar() {
     while (1) {
         // Zera buffer para enviar nova mensagem
@@ -67,7 +62,8 @@ void* receber() {
             // Se não foi possível receber...
 
             // Printa erro de recebimento
-            perror("\x1B[31msend\x1B[39m");
+            ERRO()
+            printf("")
 
             break;
         } else {
@@ -81,7 +77,8 @@ void* receber() {
                 // Se usuário já estiver sendo utilizado...
 
                 // Printa aviso de usuário já utilizado
-                printf("\x1B[31Error:\x1B[39m O usuário %s já está sendo utlizado, mude para conectar.\n", cliente.nome);
+                ERRO();
+                printf("O usuário %s já está sendo utlizado, mude para conectar.\n", cliente.user);
                 break;
                 
             } else {
