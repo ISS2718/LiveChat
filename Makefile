@@ -1,30 +1,34 @@
 SRC := src
+SERVIDOR := $(SRC)/Servidor
+CLIENTE := $(SRC)/Cliente
+INCLUDES := $(SRC)/INCLUDES
 
 DBFLAGS := -Wall -g3
 COMMON_FLAGS := -march=native -O3 $(DEBUG)
 
-all: servidor cliente
+all: includes servidor cliente
 
 allCliente: cliente runCliente
 
 allServidor: servidor runServidor
 
-listaClientes: $(SRC)/listaClientes.c
-	gcc $(COMMON_FLAGS) -o $(SRC)/listaClientes.o -c $(SRC)/listaClientes.c
+includes: $(INCLUDES)/listaClientes.c $(INCLUDES)/msg.c
+	$(MAKE) -C $(INCLUDES) all
 
-msg: $(SRC)/msg.c
-	gcc $(COMMON_FLAGS) -o $(SRC)/msg.o -c $(SRC)/msg.c
-
-servidor: $(SRC)/servidor.c listaClientes msg
-	gcc $(COMMON_FLAGS) -o $(SRC)/objServidor.o -c $(SRC)/servidor.c
-	gcc $(COMMON_FLAGS) -o servidor.out $(SRC)/objServidor.o $(SRC)/listaClientes.o $(SRC)/msg.o
+servidor: includes $(SERVIDOR)/main.c $(SERVIDOR)/servidor.c
+	$(MAKE) -C $(SERVIDOR) all
 	
-cliente: $(SRC)/cliente.c msg
-	gcc $(COMMON_FLAGS) -o $(SRC)/objCliente.o -c $(SRC)/cliente.c
-	gcc $(COMMON_FLAGS) -o cliente.out $(SRC)/objCliente.o $(SRC)/msg.o
+cliente: includes $(CLIENTE)/main.c $(CLIENTE)/cliente.c
+	$(MAKE) -C $(CLIENTE) all
 
 runCliente:
 	./cliente.out
 
 runServidor:
 	./servidor.out
+
+clear:
+	$(MAKE) -C $(INCLUDES) clear
+	$(MAKE) -C $(SERVIDOR) clear
+	$(MAKE) -C $(CLIENTE) clear
+	clear

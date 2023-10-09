@@ -2,6 +2,8 @@
 #define _LISTA_CLIENTES_H_
 
 #include <netinet/in.h>
+#include <time.h>
+
 #include "msg.h"
 #include "config.h"
 
