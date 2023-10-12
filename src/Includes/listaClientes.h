@@ -21,6 +21,7 @@ typedef struct cliente{
     struct cliente * proximo;
 }Cliente;
 
+//Lista de clientes.
 typedef struct cliente * ListaClientes;
 
 ListaClientes * criaListaClientes();
