@@ -50,9 +50,11 @@ int main(){
     tirabarran(cliente.user);
 
     // Monta a String para envio do nome e usuário no padrão #nome#usuário. 
-    strcpy(usr_envia, CODIGO_REGISTRO);
+    usr_envia[0] = CODIGO_REGISTRO;
+    usr_envia[1] = '\0';
     strcat(usr_envia, cliente.nome);
-    strcat(usr_envia, CODIGO_REGISTRO);
+    usr_envia[strlen(usr_envia)] = CODIGO_REGISTRO;
+    usr_envia[strlen(usr_envia) + 1] = '\0';
     strcat(usr_envia, cliente.user);
     strcat(usr_envia, "\n\0");
 

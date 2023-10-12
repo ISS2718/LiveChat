@@ -76,6 +76,7 @@ int main(){
 
         //Se o cliente não está conectado, as mensagens que chegam são informações do usuário para conectá-lo.
         if(!clienteConectado(endMensageiro, listaClientes)){
+            printf("to aqui\n");
             InfoCliente infoCliente = criaRegistroCliente(mensagem); //Cria o registro do cliente a partir da mensagem recebida.
 
             if(infoCliente.moderador == -1)

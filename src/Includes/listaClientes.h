@@ -27,7 +27,7 @@
  * @var int InfoCliente::mute 
  * Indica se o cliente está silenciado.
  */
-typedef struct {
+typedef struct InfoCliente {
     char nome[TAM_NOME];
     char user[TAM_USER];
     int moderador;
@@ -48,7 +48,7 @@ typedef struct {
  * @var struct Cliente * Cliente::proximo 
  * Um ponteiro para o próximo cliente na lista.
  */
-typedef struct {
+typedef struct cliente {
     struct sockaddr_in endereco;
     InfoCliente registro;
     struct cliente * proximo;
