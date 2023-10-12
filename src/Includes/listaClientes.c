@@ -9,10 +9,7 @@
 #include "config.h"
 #include "msg.h"
 
-/**
- * Cria uma nova lista de clientes.
- * @return lista de clientes vazia.
-*/
+
 ListaClientes * criaListaClientes(){
     ListaClientes * listaClientes = (ListaClientes*) malloc(sizeof(ListaClientes)); //Aloca dinamicamente uma lista de clientes.
     //Se foi possível alocar a lista de clientes, inicializa como vazia.
@@ -21,13 +18,6 @@ ListaClientes * criaListaClientes(){
     return listaClientes;
 }
 
-/**
- * Cria um regristro de cliente a partir de uma linha de informações sobre o cliente.
- * @param infoGeral string com informação do cliente.
- * @return registro de informações do cliente.
- *  
- * @note a string "infoGeral" deve ser uma linha com dois parâmetros iniciada com CODIGO_REGISTRO (definido em config.h) da seguinte forma: "#nome#usuário".
-*/
 InfoCliente criaRegistroCliente(char * infoGeral){
     int tamanho = strlen(infoGeral);
     int j = -1;
@@ -81,10 +71,6 @@ InfoCliente criaRegistroCliente(char * infoGeral){
 
 }
 
-/**
- * Desaloca a memória reservada para a lista de clientes.
- * @param listaClientes lista de clientes conectados no servidor.
-*/
 void liberaListaClientes(ListaClientes * listaClientes){
     //Se existe lista de clientes.
     if(listaClientes != NULL){
@@ -100,12 +86,6 @@ void liberaListaClientes(ListaClientes * listaClientes){
     }
 }
 
-/**
- * Insere um cliente na lista de clientes através do registro.
- * @param registro registro com as informações do cliente.
- * @param endereco endereço do cliente a se inserir na lista.
- * @param listaClientes lista de clientes conectados no servidor.
-*/
 void insereListaClientes(InfoCliente registro, struct sockaddr_in endereco, ListaClientes * listaClientes){
     //Se não há lista de clientes, retorna.
     if(listaClientes == NULL)
@@ -131,12 +111,6 @@ void insereListaClientes(InfoCliente registro, struct sockaddr_in endereco, List
     return;
 }
 
-/**
- * Imprime a lista de clientes conectados.
- * @param listaClientes lista de clientes conectados.
- * 
- * @note essa função é para debug. Ela não é usada propriamente no código.
-*/
 void imprimeListaClientes(ListaClientes * listaClientes){
     //Se não há lista de clientes alocada, imprime-se o aviso.
     if(listaClientes == NULL){
@@ -165,12 +139,6 @@ void imprimeListaClientes(ListaClientes * listaClientes){
     }
 }
 
-/**
- * Verifica se existe cliente na lista, através do seu registro.
- * @param registro registro de informações do cliente.
- * @param listaClientes lista de clientes conectados no servidor.
- * @return cliente está na lista (0) ou não está (1).
-*/
 int existeClienteLista(InfoCliente registro, ListaClientes * listaClientes){
     //Se não há lista, retorna que não há clientes na lista.
     if(listaClientes == NULL)
@@ -191,12 +159,6 @@ int existeClienteLista(InfoCliente registro, ListaClientes * listaClientes){
     return 0; //Caso a lista tenha sido percorrida inteira sem encontrar, retorna insucesso.
 }
 
-/**
- * Verifica se existe cliente na lista, através do seu endereço.
- * @param endereco endereço de informações do cliente.
- * @param listaClientes lista de clientes conectados no servidor.
- * @return cliente está na lista (0) ou não está (1).
-*/
 int existeEnderecoLista(struct sockaddr_in endereco, ListaClientes * listaClientes){
     //Se não há lista, retorna que não há clientes na lista.
     if(listaClientes == NULL)
@@ -218,12 +180,6 @@ int existeEnderecoLista(struct sockaddr_in endereco, ListaClientes * listaClient
     return 0; //Caso a lista tenha sido percorrida inteira sem encontrar, retorna insucesso.
 }
 
-/**
- * Verifica se dois endereços são iguais.
- * @param A primeiro endereço.
- * @param B segundo endereço.
- * @return endereços iguais (1) ou endereços diferentes (0).
-*/
 int enderecosIguais(struct sockaddr_in A, struct sockaddr_in B){
     int bEndereco = strncmp((char *) &A.sin_addr.s_addr, (char *) &B.sin_addr.s_addr, sizeof(unsigned int)); //Compara o endereço de IP.
 
@@ -239,12 +195,6 @@ int enderecosIguais(struct sockaddr_in A, struct sockaddr_in B){
     return 0;
 }
 
-/**
- * Retorna um cliente buscado pelo seu endereço.
- * @param endereco endereço do cliente a se buscar.
- * @param listaClientes lista de clientes conectados no servidor.
- * @return cliente encontrado ou NULL se não encontrado.
-*/
 Cliente * retornaClientePorEndereco(struct sockaddr_in endereco, ListaClientes * listaClientes){
     Cliente * cliente = *listaClientes;
     //Percorre toda a lista de clientes conectados.
@@ -266,12 +216,6 @@ Cliente * retornaClientePorEndereco(struct sockaddr_in endereco, ListaClientes *
     return NULL;
 }
 
-/**
- * Retorna um cliente buscado pelo seu usuário.
- * @param usuario endereço do cliente a se buscar.
- * @param listaClientes lista de clientes conectados no servidor.
- * @return cliente encontrado ou NULL se não encontrado.
-*/
 Cliente * retornaClientePorUsuario(char * usuario, ListaClientes * listaClientes){
     Cliente * cliente = *listaClientes;
     //Percorre toda a lista de clientes conectados.
@@ -285,12 +229,6 @@ Cliente * retornaClientePorUsuario(char * usuario, ListaClientes * listaClientes
     return NULL;
 }
 
-/**
- * Retorna registro de um cliente buscando pelo seu endereço.
- * @param endCliente endereço do cliente a se buscar.
- * @param listaClientes lista de clientes conectados.
- * @return registros do cliente conectado, ou um registro com valores nulos.
-*/
 InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes){
     //Inicia um registro com valores nulos.
     InfoCliente infoCliente;
@@ -318,11 +256,6 @@ InfoCliente retornaRegistroPorEndereco(struct sockaddr_in endCliente, ListaClien
     return infoCliente;
 }
 
-/**
- * Remove um cliente buscando pelo seu endereço.
- * @param endCliente endereço do cliente a se remover.
- * @param listaClientes lista de clientes conectados.
-*/
 void removeClientePorEndereco(struct sockaddr_in endCliente, ListaClientes * listaClientes) {
 
     //Se não há lista ou não há itens na lista, retorna.
@@ -355,11 +288,6 @@ void removeClientePorEndereco(struct sockaddr_in endCliente, ListaClientes * lis
     }
 }
 
-/**
- * Remove um cliente buscando pelo seu usuário.
- * @param usuario usuário do cliente a se remover.
- * @param listaClientes lista de clientes conectados.
-*/
 void removeClientePorUsuario(char * usuario, ListaClientes * listaClientes) {
     //Se não há lista ou não há itens na lista, retorna.
     if(listaClientes == NULL || *listaClientes == NULL){
