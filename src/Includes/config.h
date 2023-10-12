@@ -3,66 +3,66 @@
 
 /**
  * @def PORTA
- * @brief 
+ * @brief Porta utilzada para conexão inicial com servidor.
  *
- * @note 
+ * @note Essa macro é utilizada tanto no Cliente e quanto no Servidor.
  */
 #define PORTA 8080
 
 /**
  * @def TAM_MSG
- * @brief 
+ * @brief Macro de definição de tamanho da mensagem
  *
- * @note 
+ * @note Essa macro é utilizada tanto no Cliente e quanto no Servidor.
  */
 #define TAM_MSG 256
 
 /**
  * @def COR_MOD
- * @brief 
+ * @brief Macro de definição de tamanho do nome real do usuário.
  *
- * @note 
+ * @note Essa macro é utilizada tanto no Cliente e quanto no Servidor.
  */
 #define TAM_NOME 64
 
 /**
  * @def TAM_USER
- * @brief 
+ * @brief Macro de definição de tamanho de usuário.
  *
- * @note 
+ * @note Essa macro é utilizada tanto no Cliente e quanto no Servidor.
  */
 #define TAM_USER 32
 
 /**
  * @def TAM_IP
- * @brief 
+ * @brief Macro de definição de tamanho de endereço de IP.
  *
- * @note 
+ * @note Essa macro é utilizada somente no Cliente.
  */
 #define TAM_IP 16
 
 
 /**
  * @def NUM_CORES_USERS
- * @brief 
+ * @brief Macro de definição de quantidade de cores para usuários.
  *
- * @note 
+ * @note Essa macro é utilizada somente no Servidor.
  */
 #define NUM_CORES_USERS 9
 
 /**
  * @def COR_MOD
- * @brief 
+ * @brief Macro de definição da cor de moderador.
  *
- * @note 
+ * @note Essa macro é utilizada somente no Servidor.
  */
 #define COR_MOD 10;
 
 /**
  * @def CODIGO_REGISTRO
- * @brief 
+ * @brief Macro de definição do caracete para envio/recebimento do nome + usurário.
  *
- * @note 
+ * @note Essa macro é utilizada tanto no Cliente e quanto no Servidor.
  */
 #define CODIGO_REGISTRO '#'
 

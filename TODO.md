@@ -6,4 +6,4 @@
     * comentar passo a passo de todas as funções de listaClientes.c
     * comentar passo a passo de todas as funções de servidor.c
 
-**TUDO NO PARÃO JAVADOC**
+**TUDO NO PARÃ1O JAVADOC**

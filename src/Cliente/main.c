@@ -50,9 +50,9 @@ int main(){
     tirabarran(cliente.user);
 
     // Monta a String para envio do nome e usuário no padrão #nome#usuário. 
-    strcpy(usr_envia, "#");
+    strcpy(usr_envia, CODIGO_REGISTRO);
     strcat(usr_envia, cliente.nome);
-    strcat(usr_envia, "#");
+    strcat(usr_envia, CODIGO_REGISTRO);
     strcat(usr_envia, cliente.user);
     strcat(usr_envia, "\n\0");
 
@@ -108,7 +108,6 @@ int main(){
     }
 
     // Criando Threads para enviar e receber mensagens.
-
     pthread_t thread_envia, thread_recebe;
     pthread_attr_t confg_thread;
     
@@ -121,14 +120,14 @@ int main(){
     pthread_attr_init(&confg_thread);
     pthread_attr_setdetachstate(&confg_thread, PTHREAD_CREATE_JOINABLE);
 
-    // Cria a Thread de envio.
+    // Cria a Thread de envio (Joinable).
     pthread_create(&thread_envia, &confg_thread, enviar, (void *) &p);
 
     // Inicializa e configura a thread para ser não joinable.
     pthread_attr_init(&confg_thread);
     pthread_attr_setdetachstate(&confg_thread, PTHREAD_CREATE_DETACHED);
 
-    // Cria a Thread de recebimento.
+    // Cria a Thread de recebimento (Não Joinable).
     pthread_create(&thread_recebe, &confg_thread, receber, (void *) &p);
 
     // Espera a thread a de envio terminar.
