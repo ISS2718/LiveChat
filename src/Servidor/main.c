@@ -92,8 +92,9 @@ int main(){
                 infoCliente.cor = COR_MOD;
             }
             
+            Cliente * cliente = (Cliente * ) malloc(Cliente *);
             if(conectarCliente(rSocket, endMensageiro, infoCliente, listaClientes, (char**) cores)){
-                printf(AVISO"User %s conectado!\n", infoCliente.user);
+                printf(AVISO "User %s conectado!\n", infoCliente.user);
 
                 char statusCliente[TAM_MSG];
                 strcat(statusCliente, infoCliente.user);

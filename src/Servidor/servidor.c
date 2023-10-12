@@ -43,12 +43,14 @@ int conectarCliente(int rSocket, struct sockaddr_in endCliente, InfoCliente regi
     //Insere o cliente na lista de clientes.
     insereListaClientes(registro, endCliente, listaClientes);
 
+    
     char mensagem[TAM_MSG];
     strcpy(mensagem, cores[0]);
     strcat(mensagem, registro.user);
     strcat(mensagem, " entrou no servidor!");
     strcat(mensagem, RESET);
     strcat(mensagem, "\n\0");
+    
 
     //Envia mensagem de conexão no servidor para todos os conectados, exceto ao recém conectado.
     enviaMensagemParaOutros(rSocket, mensagem, endCliente, listaClientes);

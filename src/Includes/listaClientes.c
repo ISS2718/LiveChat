@@ -106,7 +106,7 @@ void liberaListaClientes(ListaClientes * listaClientes){
  * @param endereco endereço do cliente a se inserir na lista.
  * @param listaClientes lista de clientes conectados no servidor.
 */
-void insereListaClientes(InfoCliente registro, struct sockaddr_in endereco, ListaClientes * listaClientes){
+void insereListaClientes(Cliente * cliente, ListaClientes * listaClientes){
     //Se não há lista de clientes, retorna.
     if(listaClientes == NULL)
         return;

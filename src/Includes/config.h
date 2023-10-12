@@ -59,6 +59,14 @@
 #define COR_MOD 10;
 
 /**
+ * @def COR_USER
+ * @brief Macro de definição da cor de usuário.
+ *
+ * @note essa macro é utilizada somente no servidor. 
+*/
+#define COR_USER "\x1B[96m";
+
+/**
  * @def CODIGO_REGISTRO
  * @brief Macro de definição do caracete para envio/recebimento do nome + usurário.
  *
