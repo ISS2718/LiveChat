@@ -64,7 +64,15 @@
  *
  * @note essa macro é utilizada somente no servidor. 
 */
-#define COR_USER "\x1B[94m"
+#define COR_MODERADOR "\x1B[34m"
+
+/**
+ * @def COR_USER
+ * @brief Macro de definição da cor de usuário.
+ *
+ * @note essa macro é utilizada somente no servidor. 
+*/
+#define COR_USER "\x1B[32m"
 
 /**
  * @def COR_CONECTADO

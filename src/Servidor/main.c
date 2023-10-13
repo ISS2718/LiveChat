@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <ifaddrs.h>
 
 #include "servidor.h"
 
@@ -46,6 +47,8 @@ int main(){
     endServidor.sin_port = htons(PORTA);
     endServidor.sin_addr.s_addr = htonl(INADDR_ANY);
 
+    
+
     memset(&(endServidor.sin_zero), '\0', 8);
 
     if(bind(rSocket, (struct sockaddr *) &endServidor, sizeof(struct sockaddr)) == -1){
@@ -53,9 +56,24 @@ int main(){
         return -1;
     }
 
-    char ip[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &endServidor,ip,INET_ADDRSTRLEN);
-    printf(AVISO"Socket esta online no IP %s e na porta %d!\n", ip, ntohs(endServidor.sin_port));
+    printf(AVISO "O socket esta conectado na porta %d e nos IPs:\n", ntohs(endServidor.sin_port));
+
+    struct ifaddrs * ifap, * ifa;
+    
+    if (getifaddrs(&ifap) == -1) {
+        perror("getifaddrs");
+        exit(EXIT_FAILURE);
+    }
+    ifa = ifap;
+    while(ifa!=NULL){
+        if (ifa->ifa_addr != NULL && ifa->ifa_addr->sa_family == AF_INET) {
+            struct sockaddr_in *addr = (struct sockaddr_in *)ifa->ifa_addr;
+            printf("\tIP: %s\n", inet_ntoa(addr->sin_addr));
+        }
+        ifa = ifa->ifa_next;
+    }
+    freeifaddrs(ifap);
+
 
     while(1){
         bzero(mensagem, TAM_MSG);
@@ -104,7 +122,12 @@ int main(){
             Cliente * clienteMensageiro = retornaClientePorEndereco(endMensageiro, listaClientes);
 
             if(!clienteMensageiro->registro.mute){
-                char * mensagemCompleta = mensagemCliente(clienteMensageiro, mensagem, COR_USER,0);
+                char * mensagemCompleta;
+                if(clienteMensageiro->registro.moderador)
+                    mensagemCompleta = mensagemCliente(clienteMensageiro, mensagem, COR_MODERADOR,0);
+                else
+                    mensagemCompleta = mensagemCliente(clienteMensageiro, mensagem, COR_USER,0);
+
                 if(mensagemCompleta != NULL){
                     printf(MENSAGEM"%s", mensagemCompleta);
                     enviaMensagemParaOutros(rSocket, mensagemCompleta,endMensageiro, listaClientes);
@@ -112,7 +135,7 @@ int main(){
                 }
             }
             else{
-                char * mensagemCompleta = mensagemServidorClientes(NULL, NULL, "Você está mutado", COR_USER);
+                char * mensagemCompleta = mensagemServidorClientes(NULL, NULL, "Você está mutado", COR_SERVIDOR);
                 if(mensagemCompleta!=NULL){
                     enviaMensagemCliente(rSocket, clienteMensageiro, mensagemCompleta);
                     printf(AVISO "Usuário %s mutado\n", clienteMensageiro->registro.user);
