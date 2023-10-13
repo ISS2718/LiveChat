@@ -75,7 +75,6 @@ int main(){
 
         //Se o cliente não está conectado, as mensagens que chegam são informações do usuário para conectá-lo.
         if(!clienteConectado(endMensageiro, listaClientes)){
-            printf("to aqui\n");
             InfoCliente infoCliente = criaRegistroCliente(mensagem); //Cria o registro do cliente a partir da mensagem recebida.
             if(infoCliente.moderador == -1)
                 continue;
@@ -102,26 +101,23 @@ int main(){
             if(verificaExecutaFuncao(rSocket, endMensageiro, mensagem, listaClientes, (char**) cores))
                 continue;
 
-            InfoCliente registroMensageiro = retornaRegistroPorEndereco(endMensageiro, listaClientes);
-            
-            char mensagemCompleta[TAM_MSG];
-            bzero(mensagemCompleta, TAM_MSG);
+            Cliente * clienteMensageiro = retornaClientePorEndereco(endMensageiro, listaClientes);
 
-            strcat(mensagemCompleta, cores[registroMensageiro.cor]);
-            strcat(mensagemCompleta, registroMensageiro.nome);
-            strcat(mensagemCompleta, "(");
-            strcat(mensagemCompleta, registroMensageiro.user);
-            strcat(mensagemCompleta, "): ");
-            strcat(mensagemCompleta, cores[11]);
-            strcat(mensagemCompleta, mensagem);
-            strcat(mensagemCompleta, "\n\0");
-
-            printf(MENSAGEM"%s", mensagemCompleta);
-
-            if(registroMensageiro.mute == 0) {
-                enviaMensagemParaOutros(rSocket, mensagemCompleta,endMensageiro, listaClientes);
-            } else {
-                printf(AVISO "Usuário %s mutado\n", registroMensageiro.user);
+            if(!clienteMensageiro->registro.mute){
+                char * mensagemCompleta = mensagemCliente(clienteMensageiro, mensagem, COR_USER,0);
+                if(mensagemCompleta != NULL){
+                    printf(MENSAGEM"%s", mensagemCompleta);
+                    enviaMensagemParaOutros(rSocket, mensagemCompleta,endMensageiro, listaClientes);
+                    free(mensagemCompleta);
+                }
+            }
+            else{
+                char * mensagemCompleta = mensagemServidorClientes(NULL, NULL, "Você está mutado", COR_USER);
+                if(mensagemCompleta!=NULL){
+                    enviaMensagemCliente(rSocket, clienteMensageiro, mensagemCompleta);
+                    printf(AVISO "Usuário %s mutado\n", clienteMensageiro->registro.user);
+                    free(mensagemCompleta);
+                }
             }
         }
 
