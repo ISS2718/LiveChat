@@ -1,7 +1,7 @@
 SRC := src
 SERVIDOR := $(SRC)/Servidor
 CLIENTE := $(SRC)/Cliente
-INCLUDES := $(SRC)/INCLUDES
+INCLUDES := $(SRC)/Includes
 
 DBFLAGS := -Wall -g3
 COMMON_FLAGS := -march=native -O3 $(DEBUG)

@@ -86,27 +86,44 @@ void liberaListaClientes(ListaClientes * listaClientes){
     }
 }
 
-void insereListaClientes(InfoCliente registro, struct sockaddr_in endereco, ListaClientes * listaClientes){
+/**
+ * Cria um cliente dinamicamente.
+ * @param endereco endereço do cliente.
+ * @param registro registro com as informações pessoais do cliente.
+ * @return cliente criado.
+*/
+Cliente * criaCliente(struct sockaddr_in endereco, InfoCliente registro){
+    //Cria um novo cliente, juntando seu endereço e informações de registro.
+    Cliente * novoCliente = (Cliente*) malloc(sizeof(Cliente));
+    if(novoCliente == NULL)
+        return NULL;
+    novoCliente->endereco = endereco;
+    novoCliente->registro = registro;
+    novoCliente->proximo = NULL;
+    return novoCliente;
+}
+
+/**
+ * Insere um cliente na lista de clientes através do registro.
+ * @param registro registro com as informações do cliente.
+ * @param endereco endereço do cliente a se inserir na lista.
+ * @param listaClientes lista de clientes conectados no servidor.
+*/
+void insereListaClientes(Cliente * cliente, ListaClientes * listaClientes){
     //Se não há lista de clientes, retorna.
     if(listaClientes == NULL)
         return;
     
-    //Cria um novo cliente, juntando seu endereço e informações de registro.
-    Cliente * novoCliente = (Cliente*) malloc(sizeof(Cliente));
-    novoCliente->endereco = endereco;
-    novoCliente->registro = registro;
-    novoCliente->proximo = NULL;
-
     //Se não há clientes na lista, adiciona o cliente na primeira posição.
     if(*listaClientes == NULL)
-        *listaClientes = novoCliente;
+        *listaClientes = cliente;
     //Se existe clientes na lista, adiciona o cliente na última posição.
     else{
         Cliente * aux = *listaClientes;
         while(aux->proximo != NULL)
             aux = aux->proximo;
         
-        aux->proximo = novoCliente;
+        aux->proximo = cliente;
     }
     return;
 }
@@ -128,17 +145,31 @@ void imprimeListaClientes(ListaClientes * listaClientes){
     //Percorre toda a lista de clientes, imprimindo o nome, o user, seu poder de moderador e sua cor.
     while(cliente != NULL){
         printf("Cliente %d:\n", i);
-        printf("\t - %s\n", cliente->registro.nome);
-        printf("\t - %s\n", cliente->registro.user);
-        printf("\t - %d\n", cliente->registro.moderador);
-        printf("\t - %d\n", cliente->registro.cor);
-        printf("\t - %d\n", cliente->registro.mute);
-        printf("\n");
+        imprimeRegistro(cliente->registro);
         i++;
         cliente = cliente->proximo;
     }
 }
 
+/**
+ * Imprime um registro de informações.
+ * @param registro registro de informações.
+*/
+void imprimeRegistro(InfoCliente registro){
+    printf(SISTEMA "Dados do cliente: \n");
+    printf("\t NOME: %s\n", registro.nome);
+    printf("\t USER: %s\n", registro.user);
+    printf("\t MODERADOR: %d\n", registro.moderador);
+    printf("\t MUTADO: %d\n", registro.mute);
+    printf("\t COR: %d\n", registro.cor);
+}
+
+/**
+ * Verifica se existe cliente na lista, através do seu registro.
+ * @param registro registro de informações do cliente.
+ * @param listaClientes lista de clientes conectados no servidor.
+ * @return cliente está na lista (0) ou não está (1).
+*/
 int existeClienteLista(InfoCliente registro, ListaClientes * listaClientes){
     //Se não há lista, retorna que não há clientes na lista.
     if(listaClientes == NULL)

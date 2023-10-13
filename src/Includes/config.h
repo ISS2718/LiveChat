@@ -56,7 +56,24 @@
  *
  * @note Essa macro é utilizada somente no Servidor.
  */
-#define COR_MOD 10;
+#define COR_MOD 10
+
+/**
+ * @def COR_USER
+ * @brief Macro de definição da cor de usuário.
+ *
+ * @note essa macro é utilizada somente no servidor. 
+*/
+#define COR_USER "\x1B[96m"
+
+/**
+ * @def COR_CONECTADO
+ * @brief Macro de definição da cor de entrada no servidor.
+ *
+ * @note essa macro é utilizada somente no servidor. 
+*/
+#define COR_CONECTADO "\x1B[32m"
+
 
 /**
  * @def CODIGO_REGISTRO

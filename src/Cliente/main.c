@@ -31,8 +31,6 @@ int main(){
     bzero(servidor_ip, TAM_IP);
     bzero(usr_envia, TAM_NOME + TAM_USER + 1);
 
-    
-
     // Requisita nome do usuário
     printf(AMARELO"Digite seu nome real (tam_máx %d):\n"RESET, TAM_NOME - 1);
     while(fgets(cliente.nome, TAM_NOME, stdin) == NULL){

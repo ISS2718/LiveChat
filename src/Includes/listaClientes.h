@@ -4,7 +4,6 @@
 #include <netinet/in.h>
 #include <time.h>
 
-#include "msg.h"
 #include "config.h"
 
 
@@ -84,23 +83,9 @@ InfoCliente criaRegistroCliente(char * infoGeral);
  * @param listaClientes lista de clientes conectados no servidor.
 */
 void liberaListaClientes(ListaClientes * listaClientes);
-
-/**
- * @fn void insereListaClientes(InfoCliente registro, struct sockaddr_in endereco, ListaClientes * listaClientes)
- * @brief Insere um cliente na lista de clientes através do registro.
- * @param registro registro com as informações do cliente.
- * @param endereco endereço do cliente a se inserir na lista.
- * @param listaClientes lista de clientes conectados no servidor.
-*/
-void insereListaClientes(InfoCliente registro, struct sockaddr_in endereco, ListaClientes * listaClientes);
-
-/**
- * @fn void insereListaClientes(InfoCliente registro, struct sockaddr_in endereco, ListaClientes* listaClientes)
- * @brief Imprime a lista de clientes conectados.
- * @param listaClientes lista de clientes conectados.
- * 
- * @note essa função é para debug. Ela não é usada propriamente no código.
-*/
+Cliente * criaCliente(struct sockaddr_in endereco, InfoCliente registro);
+void insereListaClientes(Cliente * cliente, ListaClientes * listaClientes);
+void imprimeRegistro(InfoCliente registro);
 void imprimeListaClientes(ListaClientes * listaClientes);
 
 /**
