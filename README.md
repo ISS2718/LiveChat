@@ -51,7 +51,7 @@ O LiveChat é composto de um Servidor e n-Clinetes. Em nosso servidor é recebid
 
 ### **3.1. Ubuntu.**
 
-### **3.1.1 GCC.**
+#### **3.1.1 GCC.**
 
 Para comkpilar e executar o LiveChat devemos ter o GCC. Primeiro, verifique se o gcc já não está instalado. Execute
 
