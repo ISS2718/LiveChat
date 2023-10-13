@@ -104,6 +104,30 @@ Caso não tenha um, ou os dois, basta procurar por pacotes equivalentes ao do ub
 
 ## **4. Guia de execução.**
 
+1. Compile todos os arquivos executando (na pasta raiz do LiveChat):
+
+```
+$ make all
+```
+
+2. Abra o servidor executando:
+
+```
+$ make runServidor
+```
+
+3. Com o servidor aberto, é preciso mantelo aberto em um terminal o tempo inteiro de execução.
+
+4. Agora em um terminal separado execute um Cliente:
+
+```
+$ make runCliente
+```
+
+5. Agora basta preencher o formulário de entrada de usuário com seu nome real, nome de usuário e IP de conexão com o servidor.
+
+6. No campo de IP caso esteja utilizando um Cliente local (na mesma maquina) utilize ```localhost```, para facilitar o processo. Mas caso queria utilizar o Cliente em máquinas separadas utilize o IP que o Servidor printou na tela ao ser iniciado.
+
 ### **4.X. Funções dos usuários.**
 
 **1. Sussurro**: um usuário pode enviar uma *mensagem* privada a outro *usuário*, executando a linha
@@ -158,6 +182,9 @@ Para desmutá-lo, executa-se
 
 
 ## **6. Resumo do Cliente.**
+
+
+
 
 ## **7. Tecnologias.**
 
