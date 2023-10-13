@@ -27,12 +27,12 @@ LiveChat é uma aplicação Servidor-Cliente de chat de "LiveStream" com comunic
        * [**Autores.**](#autores)     
    * [**Tabela de conteúdos.**](#tabela-de-conte%C3%BAdos)
    * [**1. Composição do projeto.**](#1-composi%C3%A7%C3%A3o-do-projeto)
-   * [**2. Pré-Requisitos**](#2-pr%C3%A9-requisitos)
+   * [**2. Pré-Requisitos.**](#2-pr%C3%A9-requisitos)
    * [**3. Instalação dos Pré-requisitos.**](#3-instala%C3%A7%C3%A3o-dos-pr%C3%A9-requisitos)
       * [**3.1. Ubuntu**](#31-ubuntu)
-      * [**3.2. Outras Distribuições Linux**](#32-outras-distribui%C3%A7%C3%B5es-linux)  
+      * [**3.2. Outras Distribuições Linux.**](#32-outras-distribui%C3%A7%C3%B5es-linux)  
    * [**4. Guia de execução.**](#4-guia-de-execu%C3%A7%C3%A3o)
-      * [**3.1. 4.1 Executando Servidor e Clientes**](#41-servidor-e-clientes)
+      * [**3.1. 4.1 Executando Servidor e Clientes.**](#41-servidor-e-clientes)
       * [**3.2. 4.2. Funções dos usuários.**](#42-fun%C3%A7%C3%B5es-dos-usu%C3%A1rios)   
    * [**5. Resumo do Servidor.**](#5-resumo-do-servidor)
    * [**6. Resumo do Cliente.**](#6-resumo-do-clienter)
@@ -45,7 +45,7 @@ LiveChat é uma aplicação Servidor-Cliente de chat de "LiveStream" com comunic
 
 O LiveChat é composto de um Servidor e n-Clinetes. Em nosso servidor é recebido todas as mensagens, realizado o monitoramento de conexões e mensagens enviadas, além de, enviar a todos outros clientes. Os clientes são aqueles que enviarão as mensagens no chat e recebem as mensagens eviadas por todos os outros clientes.
 
-## **2. Pré-Requisitos**
+## **2. Pré-Requisitos.**
 
 * GCC;
 * GNU make;
@@ -107,7 +107,7 @@ Caso não tenha um, ou os dois, basta procurar por pacotes equivalentes ao do ub
 
 ## **4. Guia de execução.**
 
-### **4.1 Servidor e Clientes**
+### **4.1 Servidor e Clientes.**
 
 1. Compile todos os arquivos executando (na pasta raiz do LiveChat):
 
