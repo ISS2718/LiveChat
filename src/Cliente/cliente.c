@@ -47,7 +47,7 @@ void* receber(void * arg) {
 
             // Printa erro de recebimento
             printf(ERRO"Não foi possível receber mensagem!");
-            break;
+            exit(1);
         } else {
             // Garante que a mensagem tem o '\0'
             bufferReceber[real_msg_tam] = '\0';
