@@ -29,7 +29,8 @@ LiveChat é uma aplicação Servidor-Cliente de chat de "LiveStream" com comunic
    * [**1. Composição do projeto.**](#1-composi%C3%A7%C3%A3o-do-projeto)
    * [**2. Pré-Requisitos**](#2-pr%C3%A9-requisitos)
    * [**3. Instalação dos Pré-requisitos.**](#3-instala%C3%A7%C3%A3o-dos-pr%C3%A9-requisitos)
-      * [**3.1.Ubuntu**](#31-ubuntu) 
+      * [**3.1. Ubuntu**](#31-ubuntu)
+      * [**3.2. Outras Distribuições Linux**](#32-outras-distribui%C3%A7%C3%B5es-linux)  
    * [**4. Guia de execução.**](#4-guia-de-execu%C3%A7%C3%A3o)
    * [**5. Resumo do Servidor.**](#5-resumo-do-driver)
    * [**6. Resumo do Cliente.**](#6-resumo-do-driver)
@@ -104,6 +105,8 @@ Caso não tenha um, ou os dois, basta procurar por pacotes equivalentes ao do ub
 
 ## **4. Guia de execução.**
 
+### **4.1 Executando Servidor e Clientes**
+
 1. Compile todos os arquivos executando (na pasta raiz do LiveChat):
 
 ```
@@ -128,7 +131,7 @@ $ make runCliente
 
 6. No campo de IP caso esteja utilizando um Cliente local (na mesma maquina) utilize ```localhost```, para facilitar o processo. Mas caso queria utilizar o Cliente em máquinas separadas utilize o IP que o Servidor printou na tela ao ser iniciado.
 
-### **4.X. Funções dos usuários.**
+### **4.2. Funções dos usuários.**
 
 **1. Sussurro**: um usuário pode enviar uma *mensagem* privada a outro *usuário*, executando a linha
 
