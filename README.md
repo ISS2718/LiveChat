@@ -32,8 +32,10 @@ LiveChat é uma aplicação Servidor-Cliente de chat de "LiveStream" com comunic
       * [**3.1. Ubuntu**](#31-ubuntu)
       * [**3.2. Outras Distribuições Linux**](#32-outras-distribui%C3%A7%C3%B5es-linux)  
    * [**4. Guia de execução.**](#4-guia-de-execu%C3%A7%C3%A3o)
-   * [**5. Resumo do Servidor.**](#5-resumo-do-driver)
-   * [**6. Resumo do Cliente.**](#6-resumo-do-driver)
+      * [**3.1. 4.1 Executando Servidor e Clientes**](#41-servidor-e-clientes)
+      * [**3.2. 4.2. Funções dos usuários.**](#42-fun%C3%A7%C3%B5es-dos-usu%C3%A1rios)   
+   * [**5. Resumo do Servidor.**](#5-resumo-do-servidor)
+   * [**6. Resumo do Cliente.**](#6-resumo-do-clienter)
    * [**7. Tecnologias.**](#7-tecnologias)
    * [**8. Licença.**](#8-licença)
 
@@ -105,7 +107,7 @@ Caso não tenha um, ou os dois, basta procurar por pacotes equivalentes ao do ub
 
 ## **4. Guia de execução.**
 
-### **4.1 Executando Servidor e Clientes**
+### **4.1 Servidor e Clientes**
 
 1. Compile todos os arquivos executando (na pasta raiz do LiveChat):
 
