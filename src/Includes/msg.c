@@ -50,9 +50,15 @@ char * mensagemServidorClientes(Cliente * remetente, Cliente * destinatario, con
     }
 
     strcpy(mensagem, cor);
-    strcat(mensagem, remetente->registro.user);
+
+    if(remetente != NULL)
+        strcat(mensagem, remetente->registro.user);
+
     strcat(mensagem, objeto);
-    strcat(mensagem, destinatario->registro.user);
+
+    if(destinatario != NULL)
+        strcat(mensagem, destinatario->registro.user);
+
     strcat(mensagem, ".");
     strcat(mensagem, RESET);
     strcat(mensagem, "\n\0");
@@ -66,20 +72,26 @@ char * mensagemServidorClientes(Cliente * remetente, Cliente * destinatario, con
  * @param objeto informação principal da mensagem.
  * @return mensagem criada.
 */
-char * mensagemCliente(Cliente * cliente, const char objeto[]){
+char * mensagemCliente(Cliente * cliente, const char objeto[], const char cor[], int monocromatico){
     char * mensagem = (char *) malloc((TAM_MSG+1) * sizeof(char)); // Aloca a memória da mensagem dinamicamente.
 
     if(mensagem == NULL){
         return NULL;
     }
     
-    strcpy(mensagem, COR_USER); //Insere a cor do usuário.
+    strcpy(mensagem, cor); //Insere a cor do usuário.
     strcat(mensagem, cliente->registro.nome);
     strcat(mensagem, "(");
     strcat(mensagem, cliente->registro.user); //Adiciona o user do cliente na mensagem.
     strcat(mensagem, "): ");
-    strcat(mensagem, RESET); //Reseta à cor padrão.
-    strcat(mensagem, objeto); //Adiciona a mensagem objeto na mensagem.
+    if(monocromatico){
+        strcat(mensagem, objeto); //Adiciona a mensagem objeto na mensagem.
+        strcat(mensagem, RESET); //Reseta à cor padrão.
+    }
+    else{
+        strcat(mensagem, RESET); //Reseta à cor padrão.
+        strcat(mensagem, objeto); //Adiciona a mensagem objeto na mensagem.
+    }
     strcat(mensagem, "\n\0");
 
     return mensagem;

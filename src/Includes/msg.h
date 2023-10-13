@@ -124,7 +124,7 @@
 void tirabarran(char* msg);
 char * mensagemServidor(Cliente * cliente, const char objeto[], const char cor[]);
 char * mensagemServidorClientes(Cliente * remetente, Cliente * destinatario, const char objeto[], const char cor []);
-char * mensagemCliente(Cliente * cliente, const char objeto[]);
+char * mensagemCliente(Cliente * cliente, const char objeto[], const char cor[], int monocromatico);
 char * mensagemErro(const char objeto[]);
 
 #endif

@@ -82,7 +82,7 @@ void enviaMensagemParaOutros(int rSocket, char * mensagem, struct sockaddr_in me
 
 /**
  * Envia mensagem para todos os clientes da lista, incluindo ao que enviou a mensagem.
- * @param r~Socket feedback da conexão.
+ * @param rSocket feedback da conexão.
  * @param mensagem mensagem a se enviar para os clientes conectados.
  * @param listaClientes lista de clientes conectados no servidor.
 */
@@ -181,30 +181,24 @@ int verificaExecutaFuncao(int rSocket, struct sockaddr_in mensageiro, char * men
         
         //Caso o cliente destino não esteja conectado.
         if(cliente == NULL){
-            char msg[TAM_MSG];
-            strcpy(msg, ERRO);
-            strcat(msg, "usuario nao foi encontrado!\n");
-            strcat(msg, "\0");
-            printf(ERRO "o usuario buscado nao esta conectado!\n");
-            enviaMensagemCliente(rSocket, clienteMensageiro, msg); //Envia uma mensagem avisando ao cliente mensageiro.
+            //Envia mensagem de erro ao cliente-mensageiro.
+            char * msg = mensagemErro("usuário buscado não foi encontrado!"); 
+            if(msg != NULL){
+                enviaMensagemCliente(rSocket, clienteMensageiro, msg); //Envia uma mensagem avisando ao cliente mensageiro.
+                free(msg);
+            }
+            printf("%s", msg);
             return 1;
         }
 
-        //Mensagem privada ao cliente destino.
-        char mensagemCompleta[TAM_MSG];
-        bzero(mensagemCompleta, TAM_MSG);
-
-        strcat(mensagemCompleta, cores[2]);
-        strcat(mensagemCompleta, clienteMensageiro->registro.nome);
-        strcat(mensagemCompleta, "(");
-        strcat(mensagemCompleta, clienteMensageiro->registro.user);
-        strcat(mensagemCompleta, "): ");
-        strcat(mensagemCompleta, param2);
-        strcat(mensagemCompleta, RESET);
-        strcat(mensagemCompleta, "\n\0");
-
-        printf(MENSAGEM"(para %s) %s", param1, mensagemCompleta);
-        enviaMensagemCliente(rSocket, cliente, mensagemCompleta); //Envia mensagem privada ao cliente destino.
+        //Envia mensagem privada ao cliente destino.
+        char * sussurro = mensagemCliente(clienteMensageiro, param2, COR_SUSSURRO, 1);
+        if(sussurro != NULL){
+            enviaMensagemCliente(rSocket, cliente, sussurro); //Envia mensagem privada ao cliente destino.
+            printf(MENSAGEM"(para %s) %s", param1, sussurro);
+            free(sussurro);
+        }
+        
         return 1;
     }
 
@@ -216,30 +210,26 @@ int verificaExecutaFuncao(int rSocket, struct sockaddr_in mensageiro, char * men
         //Se não há clientes na lista com o usuário do primeiro parâmetro.
         if(cliente == NULL){
             //Envia mensagem avisando ao cliente mensageiro que o usuário não foi encontrado.
-            char msg[TAM_MSG];
-            strcpy(msg, ERRO);
-            strcat(msg, "usuario nao foi encontrado!\n");
-            strcat(msg, "\0");
-            printf(ERRO "o usuario buscado nao esta conectado!\n");
-            enviaMensagemCliente(rSocket, clienteMensageiro, msg); 
+            char * msg = mensagemErro("usuário buscado não foi encontrado!"); 
+            if(msg != NULL){
+                enviaMensagemCliente(rSocket, clienteMensageiro, msg); //Envia uma mensagem avisando ao cliente mensageiro.
+                free(msg);
+            }
+            printf("%s", msg);
             return 1;
         }
 
         //Se o cliente mensageiro não é moderador, ele não pode executar essa função.
         if(clienteMensageiro->registro.moderador != 1){
             //Envia mensagem avisando ao cliente mensageiro que ele não pode executar essa função.
-            char msg[TAM_MSG];
-            strcpy(msg, ERRO);
-            strcat(msg, "você não pode executar essa função!\n");
-            strcat(msg, "\0");
-            enviaMensagemCliente(rSocket, clienteMensageiro, msg); 
+            char * msg = mensagemErro("você não pode executar essa função!"); 
+            if(msg != NULL){
+                enviaMensagemCliente(rSocket, clienteMensageiro, msg); //Envia uma mensagem avisando ao cliente mensageiro.
+                free(msg);
+            }
             printf(ERRO "usuario %s nao e moderador.\n", clienteMensageiro->registro.user);
-
             return 1;
         }
-
-        char msg[TAM_MSG];
-        bzero(msg, TAM_MSG);
 
         //Se cliente destino não tem poder de moderador e tenta dar poder ao cliente destino.
         if((cliente->registro.moderador == 0) && (strcmp(param2, "true") == 0)){
@@ -247,47 +237,42 @@ int verificaExecutaFuncao(int rSocket, struct sockaddr_in mensageiro, char * men
             cliente->registro.cor = COR_MOD; //Muda-se a cor do cliente destino para cor de moderador.
 
             //Envia para todos os clientes sobre o novo moderador.
-            strcpy(msg, AMARELO);
-            strcat(msg, clienteMensageiro->registro.user);
-            strcat(msg, " deu poder de moderador a ");
-            strcat(msg, cliente->registro.user);
-            strcat(msg, ".");
-            strcat(msg, RESET);
-            strcat(msg, "\n\0");
-            enviaMensagemParaOutros(rSocket, msg, mensageiro, listaClientes); 
+            char * msg = mensagemServidorClientes(clienteMensageiro, cliente, " deu poder de moderador a ", COR_SERVIDOR);
+            if(msg != NULL){
+                enviaMensagemParaOutros(rSocket, msg, mensageiro, listaClientes); 
+                free(msg);
+            }
+            
+            //Envia para o cliente-mensageiro sobre o novo moderador.
+            msg = mensagemServidorClientes(NULL, cliente, "Você deu poder de moderador a ", COR_SERVIDOR);
+            if(msg != NULL){
+                enviaMensagemCliente(rSocket, clienteMensageiro, msg);
+                free(msg);
+            }
 
-            strcpy(msg, AMARELO);
-            strcat(msg, "você deu poder de moderador a ");
-            strcat(msg, cliente->registro.user);
-            strcat(msg, RESET);
-            strcat(msg, ".");
-            strcat(msg, " \n\0");
-            enviaMensagemCliente(rSocket, clienteMensageiro, msg);
             printf(SISTEMA "usuario %s deu poder de moderador a %s.\n", clienteMensageiro->registro.user, cliente->registro.user);
         } 
+
         //Se cliente destino não tem poder de moderador e tenta retirar o poder do cliente destino.
         else if((cliente->registro.moderador == 0) &&(strcmp(param2, "false") == 0)){
             //Envia mensagem avisando ao cliente mensageiro que o cliente-destino não é moderador para retirar o seu poder de moderador.
-            char msg[TAM_MSG];
-            strcpy(msg, ERRO);
-            strcat(msg, cliente->registro.user);
-            strcat(msg, " não é moderador.\n");
-            strcat(msg, RESET);
-            strcat(msg, "\0");
-            enviaMensagemCliente(rSocket, clienteMensageiro, msg); 
-            printf(SISTEMA "usuario %s tentou retirar poder de moderador de %s.\n", clienteMensageiro->registro.user, cliente->registro.user);
+            char * msg = mensagemErro("Você não pode tirar poder de moderador de quem não é moderador.");
+            if(msg != NULL){
+                enviaMensagemCliente(rSocket, clienteMensageiro, msg); 
+                free(msg);
+            }
+            printf(ERRO "usuario %s tentou retirar poder de moderador de %s.\n", clienteMensageiro->registro.user, cliente->registro.user);
         }
+
         //Se cliente destino tem poder de moderador e tenta dar poder ao cliente destino.
         else if((cliente->registro.moderador == 1) && (strcmp(param2, "true") == 0)){
             //Envia mensagem avisando ao cliente-mensageiro que o cliente destino já tem poder de moderador.
-            char msg[TAM_MSG];
-            strcpy(msg, ERRO);
-            strcat(msg, cliente->registro.user);
-            strcat(msg, " ja possui poder de moderador.");
-            strcat(msg, RESET);
-            strcat(msg, "\n\0");
-            enviaMensagemCliente(rSocket, clienteMensageiro, msg);  
-            printf(SISTEMA "usuario %s tentou dar poder de moderador a %s.\n", clienteMensageiro->registro.user, cliente->registro.user);
+            char * msg = mensagemErro("Você não pode dar poder de moderador a quem já é moderador.");
+            if(msg != NULL){
+                enviaMensagemCliente(rSocket, clienteMensageiro, msg); 
+                free(msg);
+            } 
+            printf(ERRO "usuario %s tentou dar poder de moderador a %s.\n", clienteMensageiro->registro.user, cliente->registro.user);
         } 
         //Se cliente destino tem poder de moderador e tenta retirar o poder do cliente destino.
         else if ((cliente->registro.moderador == 1) && (strcmp(param2, "false") == 0)){
@@ -296,22 +281,18 @@ int verificaExecutaFuncao(int rSocket, struct sockaddr_in mensageiro, char * men
             cliente->registro.cor = rand() % NUM_CORES_USERS; //Atribui-se uma cor aleatória para o user do cliente-destino.
 
             //Envia mensagem a todos sobre a revogação do poder de moderador.
-            strcpy(msg, AMARELO);
-            strcat(msg, clienteMensageiro->registro.user);
-            strcat(msg, " retirou o poder de moderador de ");
-            strcat(msg, cliente->registro.user);
-            strcat(msg, ".");
-            strcat(msg, RESET);
-            strcat(msg, "\n\0");
-            enviaMensagemParaOutros(rSocket, msg, mensageiro, listaClientes); 
-
-            strcpy(msg, AMARELO);
-            strcat(msg, "você retirou poder de moderador de ");
-            strcat(msg, cliente->registro.user);
-            strcat(msg, ".");
-            strcat(msg, RESET);
-            strcat(msg, " \n\0");
-            enviaMensagemCliente(rSocket, clienteMensageiro, msg);
+            char * msg = mensagemServidorClientes(clienteMensageiro, cliente, " retirou poder de moderador de ", COR_SERVIDOR);
+            if(msg != NULL){
+                enviaMensagemParaOutros(rSocket, msg, mensageiro, listaClientes); 
+                free(msg);
+            }
+            
+            //Envia para o cliente-mensageiro sobre o novo moderador.
+            msg = mensagemServidorClientes(NULL, cliente, "Você retirou poder de moderador de ", COR_SERVIDOR);
+            if(msg != NULL){
+                enviaMensagemCliente(rSocket, clienteMensageiro, msg);
+                free(msg);
+            }
 
             printf(SISTEMA "usuario %s retirou poder de moderador a %s.\n", clienteMensageiro->registro.user, cliente->registro.user);
         }
@@ -323,14 +304,14 @@ int verificaExecutaFuncao(int rSocket, struct sockaddr_in mensageiro, char * men
     else if(strcmp(funcao, FECHAR_CLIENTE) == 0) {
         Cliente * clienteMensageiro = retornaClientePorEndereco(mensageiro, listaClientes); //Obtém o cliente mensageiro por endereço.
         printf(SISTEMA "removendo usuario %s...\n", clienteMensageiro->registro.user);
-        char mensagem[TAM_USER + 50];
-        strcpy(mensagem, "\x1B[31mUsuário: ");
-        strcat(mensagem, clienteMensageiro->registro.user);
-        strcat(mensagem, " desconectado");
-        strcat(mensagem, RESET);
-        strcat(mensagem, " \n\0");
-        //enviaMensagemCliente(rSocket, clienteMensageiro, mensagem);
-        enviaMensagemParaOutros(rSocket, mensagem, mensageiro, listaClientes); //Envia mensagem a todos os outros clientes sobre a saída.
+        
+        //Envia mensagem de desconexão a todos os outros usuários.
+        char * msg = mensagemServidorClientes(clienteMensageiro, NULL, " foi desconectado", COR_SERVIDOR);
+        if(msg != NULL){
+            enviaMensagemParaOutros(rSocket, mensagem, mensageiro, listaClientes); //Envia mensagem a todos os outros clientes sobre a saída.
+            free(msg);
+        }
+
         removeClientePorUsuario(clienteMensageiro->registro.user, listaClientes);
         printf(SISTEMA "cliente removido.\n");
         return 1;
@@ -339,24 +320,22 @@ int verificaExecutaFuncao(int rSocket, struct sockaddr_in mensageiro, char * men
     //Verifica se a função é de fechar o servidor: um cliente deseja fechar o servidor.
     else if(strcmp(funcao, FECHAR_SERVIDOR) == 0) {
         Cliente * clienteMensageiro = retornaClientePorEndereco(mensageiro, listaClientes); //Obtém o cliente mensageiro por endereço.
-        char mensagem[TAM_USER + 50];
 
         //Verifica se o cliente-mensageiro é moderador.
         if(clienteMensageiro->registro.moderador == 1) {
-            //Envia aviso de encerramento para os usuários, que o LiveChat foi encerrado pelo cliente-mensageiro.
-            strcpy(mensagem, AMARELO);
-            strcat(mensagem, clienteMensageiro->registro.user);
-            strcat(mensagem, " encerrou o LiveChat.");
-            strcat(mensagem, RESET);
-            strcat(mensagem, " \n\0");
-            enviaMensagemParaOutros(rSocket, mensagem, mensageiro, listaClientes);
+            //Envia aviso de encerramento para os outros usuários.
+            char * mensagem = mensagemServidorClientes(clienteMensageiro, NULL, " encerrou o LiveChat", COR_SERVIDOR);
+            if(mensagem != NULL){
+                enviaMensagemParaOutros(rSocket, mensagem, mensageiro, listaClientes);
+                free(mensagem);
+            }
 
-            //Envia aviso de encerramento para o moderador que encerrou o LiveChat.
-            strcpy(mensagem, AMARELO);
-            strcat(mensagem, "Você encerrou o LiveChat.");
-            strcat(mensagem, RESET);
-            strcat(mensagem, " \n\0");
-            enviaMensagemCliente(rSocket, clienteMensageiro, mensagem);
+            //Envia aviso de encerramento para o cliente-mensageiro.
+            mensagem = mensagemServidorClientes(NULL, NULL, "Você encerrou o LiveChat", COR_SERVIDOR);
+            if(mensagem == NULL){
+                enviaMensagemCliente(rSocket, clienteMensageiro, mensagem);
+                free(mensagem);
+            }
 
             // Desconecta todos os clientes
             enviaMensagemParaTodos(rSocket, DESCONECTAR, listaClientes);
@@ -370,11 +349,12 @@ int verificaExecutaFuncao(int rSocket, struct sockaddr_in mensageiro, char * men
         } 
         //Caso o cliente-mensageiro não é moderador.
         else{
-            //Envia aviso ao cliente-mensageiro sobre não ser permitido encerrar o LiveChat.
-            strcpy(mensagem, ERRO);
-            strcat(mensagem, "você não pode executar essa função!\n");
-            strcat(mensagem, "\0");
-            enviaMensagemCliente(rSocket, clienteMensageiro, mensagem);
+            //Envia mensagem avisando ao cliente mensageiro que ele não pode executar essa função.
+            char * msg = mensagemErro("você não pode executar essa função!"); 
+            if(msg != NULL){
+                enviaMensagemCliente(rSocket, clienteMensageiro, msg); //Envia uma mensagem avisando ao cliente mensageiro.
+                free(msg);
+            }
             printf(ERRO "usuario %s nao e moderador.\n", clienteMensageiro->registro.user);
         }
 
@@ -384,81 +364,77 @@ int verificaExecutaFuncao(int rSocket, struct sockaddr_in mensageiro, char * men
     //Verifica se a função é de mutar um cliente: um moderador deseja mutar um usuário.
     else if(strcmp(funcao, MUTE) == 0) {
         Cliente * clienteMensageiro = retornaClientePorEndereco(mensageiro, listaClientes); //Obtém o cliente-mensageiro pelo seu endereço.
-        Cliente * mutado = retornaClientePorUsuario(param1, listaClientes);  //Obtém o cliente-destino pelo seu usuário.
+        Cliente * cliente = retornaClientePorUsuario(param1, listaClientes);  //Obtém o cliente-destino pelo seu usuário.
         
         // Se o cliente mensageiro for moderador e tentar mutar o usuário destino.
         if((clienteMensageiro->registro.moderador == 1) && (strcmp(param2, "true") == 0)) {
             //Se o usuário está DESMUTADO.
-            if(mutado->registro.mute == 0){
-                mutado->registro.mute = 1; //Muta-se o cliente-destino.
+            if(cliente->registro.mute == 0){
+                cliente->registro.mute = 1; //Muta-se o cliente-destino.
 
                 //Avisa a todos que o cliente-destino foi mutado.
-                char mensagem[TAM_USER + 50];
-                strcpy(mensagem, AMARELO);
-                strcat(mensagem, mutado->registro.user);
-                strcat(mensagem, " foi mutado."); 
-                strcat(mensagem, RESET);
-                strcat(mensagem, " \n\0");
-                enviaMensagemParaOutros(rSocket, mensagem, mensageiro, listaClientes); 
+                char * mensagem = mensagemServidorClientes(cliente, NULL, " foi mutado", COR_SERVIDOR);
+                if(mensagem != NULL){
+                    enviaMensagemParaOutros(rSocket, mensagem, mensageiro, listaClientes); 
+                    free(mensagem);
+                }
 
-                strcpy(mensagem, AMARELO);
-                strcat(mensagem, "você mutou ");
-                strcat(mensagem, mutado->registro.user);
-                strcat(mensagem, RESET);
-                strcat(mensagem, " \n\0");
-                enviaMensagemCliente(rSocket, clienteMensageiro, mensagem); 
+                //Avisa ao cliente-mensageiro que o cliente-destino foi mutado.
+                mensagem = mensagemServidorClientes(NULL, cliente, " Você mutou ", COR_SERVIDOR);
+                if(mensagem != NULL){
+                    enviaMensagemCliente(rSocket, clienteMensageiro, mensagem); 
+                    free(mensagem);
+                }
+
             }
             //Se o usuário está MUTADO.
             else{
                 //Avisa ao cliente-mensageiro que o cliente-destino já está mutado.
-                char mensagem[TAM_USER + 50];
-                strcpy(mensagem, ERRO);
-                strcat(mensagem, mutado->registro.user);
-                strcat(mensagem, " já está mutado.");
-                strcat(mensagem, " \n\0");
-                enviaMensagemCliente(rSocket, clienteMensageiro, mensagem);
+                char * mensagem = mensagemErro("Usuário já está mutado.");
+                if(mensagem != NULL){
+                    enviaMensagemCliente(rSocket, clienteMensageiro, mensagem);
+                    free(mensagem);
+                }
             }                 
         } 
         // Se o cliente mensageiro for moderador e tentar desmutar o usuário destino.
         else if((clienteMensageiro->registro.moderador == 1) && (strcmp(param2, "false") == 0)) {
             //Se o usuário está DESMUTADO
-            if(mutado->registro.mute == 0){
+            if(cliente->registro.mute == 0){
                 //Avisa ao cliente-mensageiro que o cliente-destino já está desmutado.
-                char mensagem[TAM_USER + 50];
-                strcpy(mensagem, ERRO);
-                strcat(mensagem, mutado->registro.user);
-                strcat(mensagem, " não está mutado."); 
-                strcat(mensagem, " \n\0");
-                enviaMensagemCliente(rSocket, clienteMensageiro, mensagem);
+                char * mensagem = mensagemErro("Usuário não está mutado.");
+                if(mensagem != NULL){
+                    enviaMensagemCliente(rSocket, clienteMensageiro, mensagem);
+                    free(mensagem);
+                }
             }
             //Se o usuário está MUTADO.
             else{
-                mutado->registro.mute = 0; //Desmuta-se o cliente-destino.
+                cliente->registro.mute = 0; //Desmuta-se o cliente-destino.
 
                 //Avisa a todos que o cliente-destino foi desmutado.
-                char mensagem[TAM_USER + 50];
-                strcpy(mensagem, AMARELO);
-                strcat(mensagem, mutado->registro.user);
-                strcat(mensagem, " foi desmutado.");
-                strcat(mensagem, RESET);
-                strcat(mensagem, " \n\0");
-                enviaMensagemParaOutros(rSocket, mensagem, mensageiro, listaClientes);
+                char * mensagem = mensagemServidorClientes(cliente, NULL, " foi desmutado", COR_SERVIDOR);
+                if(mensagem != NULL){
+                    enviaMensagemParaOutros(rSocket, mensagem, mensageiro, listaClientes); 
+                    free(mensagem);
+                }
 
-                strcpy(mensagem, AMARELO);
-                strcat(mensagem, "você desmutou ");
-                strcat(mensagem, mutado->registro.user);
-                strcat(mensagem, RESET);
-                strcat(mensagem, " \n\0");
-                enviaMensagemCliente(rSocket, clienteMensageiro, mensagem);
+                //Avisa ao cliente-mensageiro que o cliente-destino foi mutado.
+                mensagem = mensagemServidorClientes(NULL, cliente, " Você desmutou ", COR_SERVIDOR);
+                if(mensagem != NULL){
+                    enviaMensagemCliente(rSocket, clienteMensageiro, mensagem); 
+                    free(mensagem);
+                }
             }
         } 
         // Se o cliente mensageiro não for moderador
         else if(clienteMensageiro->registro.moderador == 0) {
-            //Envia aviso ao cliente-mensageiro sobre não ser permitido encerrar o LiveChat.
-            strcpy(mensagem, ERRO);
-            strcat(mensagem, "você não pode executar essa função!\n");
-            strcat(mensagem, "\0");
-            enviaMensagemCliente(rSocket, clienteMensageiro, mensagem);
+            //Envia mensagem avisando ao cliente mensageiro que ele não pode executar essa função.
+            char * msg = mensagemErro("você não pode executar essa função!"); 
+            if(msg != NULL){
+                enviaMensagemCliente(rSocket, clienteMensageiro, msg); //Envia uma mensagem avisando ao cliente mensageiro.
+                free(msg);
+            }
             printf(ERRO "usuario %s nao e moderador.\n", clienteMensageiro->registro.user);
         }
             
@@ -469,15 +445,14 @@ int verificaExecutaFuncao(int rSocket, struct sockaddr_in mensageiro, char * men
     else if(strcmp(funcao, MOSTRAR_CLIENTES) == 0){
         Cliente * clienteMensageiro = retornaClientePorEndereco(mensageiro, listaClientes); //Obtém o cliente-mensageiro pelo seu endereço.
         
-        char mensagem[TAM_MSG];
         //Se a lista de clientes não existe ou está vazia.
         if(listaClientes == NULL || *listaClientes == NULL){
             //Envia ao cliente-mensageiro que não há clientes conectados.
-            strcpy(mensagem, AMARELO);
-            strcat(mensagem, "Não há clientes conectados.\n");
-            strcat(mensagem, RESET);
-            strcat(mensagem, "\0");
-            enviaMensagemCliente(rSocket, clienteMensageiro, mensagem);
+            char * mensagem = mensagemServidorClientes(NULL, NULL, "Não há clientes conectados", COR_SERVIDOR);
+            if(mensagem != NULL){
+                enviaMensagemCliente(rSocket, clienteMensageiro, mensagem);
+                free(mensagem);
+            }
             return 1;
         }
         
@@ -492,7 +467,7 @@ int verificaExecutaFuncao(int rSocket, struct sockaddr_in mensageiro, char * men
         Cliente * cliente = *listaClientes;
         while(cliente != NULL){
             strcpy(mensagem, "- ");
-            strcat(mensagem, cores[cliente->registro.cor]);
+            strcat(mensagem, COR_USER);
             strcat(mensagem, cliente->registro.user);
             
             //Se um cliente é moderador, ele possui uma indicação de moderador.

@@ -64,7 +64,7 @@
  *
  * @note essa macro é utilizada somente no servidor. 
 */
-#define COR_USER "\x1B[96m"
+#define COR_USER "\x1B[94m"
 
 /**
  * @def COR_CONECTADO
@@ -73,6 +73,22 @@
  * @note essa macro é utilizada somente no servidor. 
 */
 #define COR_CONECTADO "\x1B[32m"
+
+/**
+ * @def COR_SERVIDOR
+ * @brief Macro de definição da cor de mensagens no servidor.
+ *
+ * @note essa macro é utilizada somente no servidor. 
+*/
+#define COR_SERVIDOR "\x1B[33m"
+
+/**
+ * @def COR_SUSSURRO
+ * @brief Macro de definição da cor de mensagens privadas.
+ *
+ * @note essa macro é utilizada somente no servidor. 
+*/
+#define COR_SUSSURRO "\x1B[35m"
 
 
 /**
