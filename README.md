@@ -32,10 +32,22 @@ LiveChat é uma aplicação Servidor-Cliente de chat de "LiveStream" com comunic
       * [**3.1. Ubuntu**](#31-ubuntu)
       * [**3.2. Outras Distribuições Linux.**](#32-outras-distribui%C3%A7%C3%B5es-linux)  
    * [**4. Guia de execução.**](#4-guia-de-execu%C3%A7%C3%A3o)
-      * [**3.1. 4.1 Executando Servidor e Clientes.**](#41-servidor-e-clientes)
-      * [**3.2. 4.2. Funções dos usuários.**](#42-fun%C3%A7%C3%B5es-dos-usu%C3%A1rios)   
+      * [**4.1 Executando Servidor e Clientes.**](#41-servidor-e-clientes)
+      * [**4.2. Funções dos usuários.**](#42-fun%C3%A7%C3%B5es-dos-usu%C3%A1rios)   
    * [**5. Resumo do Servidor.**](#5-resumo-do-servidor)
+      * [**5.1. Lista de clientes conectados.**](#51-lista-de-clientes-conectados)
+      * [**5.2. Socket.**](#52-socket)
+      * [**5.3. Conexão do cliente.**](#53-conex%C3%A3o-do-cliente)
+         * [**5.3.1. Identificação dos clientes e moderadores.**](#531-identifica%C3%A7%C3%A3o-dos-clientes-e-moderadores)
+         * [**5.3.2. Envio de mensagens aos clientes.**](#532-envio-de-mensagens-aos-clientes)
+      * [**5.4. Identificação das funções.**](#54-identifica%C3%A7%C3%A3o-das-fun%C3%A7%C3%B5e)
    * [**6. Resumo do Cliente.**](#6-resumo-do-clienter)
+      * [**6.1. Usuário**](#61-usu%C3%A1rio)
+      * [**6.2. Socket**](#62-socket)
+      * [**6.3. Primeira Mensagem**](#63-primeira-mensagem)
+      * [**6.4. Threads**](#64-threads)
+      * [**6.5. Função de Envio**](#65-fun%C3%A7%C3%A3o-de-envio)
+      * [**6.6. Função de Recebimento**](#66-fun%C3%A7%C3%A3o-de-recebimento)
    * [**7. Tecnologias.**](#7-tecnologias)
    * [**8. Licença.**](#8-licença)
 
@@ -131,7 +143,7 @@ $ make runCliente
 
 5. Agora basta preencher o formulário de entrada de usuário com seu nome real, nome de usuário e IP de conexão com o servidor.
 
-6. No campo de IP caso esteja utilizando um Cliente local (na mesma maquina) utilize ```localhost```, para facilitar o processo. Mas caso queria utilizar o Cliente em máquinas separadas (mas na mesma rede) utilize o IP que o Servidor printou na tela ao ser iniciado.
+6. No campo de IP caso esteja utilizando um Cliente local (na mesma maquina) utilize ```localhost```, para facilitar o processo. Mas caso queria utilizar o Cliente em máquinas separadas (mas na mesma rede) utilize o 2° - IP que o Servidor printou na tela ao ser iniciado.
 
 ### **4.2. Funções dos usuários.**
 
