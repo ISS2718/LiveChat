@@ -2,9 +2,11 @@
 #define _MSG_H_
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "config.h"
+#include "listaClientes.h"
 
 /**
  * @def CLIENTE_JA_CONECTADO
@@ -120,5 +122,9 @@
  * @note Esta função só tira o '\n' do final da mensagem, isto é, antes do '\0'.
  */
 void tirabarran(char* msg);
+char * mensagemServidor(Cliente * cliente, const char objeto[], const char cor[]);
+char * mensagemServidorClientes(Cliente * remetente, Cliente * destinatario, const char objeto[], const char cor []);
+char * mensagemCliente(Cliente * cliente, const char objeto[]);
+char * mensagemErro(const char objeto[]);
 
 #endif

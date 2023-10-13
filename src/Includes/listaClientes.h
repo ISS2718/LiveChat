@@ -4,7 +4,6 @@
 #include <netinet/in.h>
 #include <time.h>
 
-#include "msg.h"
 #include "config.h"
 
 typedef struct infoCliente{
@@ -27,7 +26,9 @@ typedef struct cliente * ListaClientes;
 ListaClientes * criaListaClientes();
 InfoCliente criaRegistroCliente(char * infoGeral);
 void liberaListaClientes(ListaClientes * listaClientes);
-void insereListaClientes(InfoCliente registro, struct sockaddr_in endereco, ListaClientes * listaClientes);
+Cliente * criaCliente(struct sockaddr_in endereco, InfoCliente registro);
+void insereListaClientes(Cliente * cliente, ListaClientes * listaClientes);
+void imprimeRegistro(InfoCliente registro);
 void imprimeListaClientes(ListaClientes * listaClientes);
 int enderecosIguais(struct sockaddr_in A, struct sockaddr_in B);
 int existeClienteLista(InfoCliente registro, ListaClientes * listaClientes);

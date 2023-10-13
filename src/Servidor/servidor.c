@@ -17,7 +17,8 @@ int conectarCliente(int rSocket, struct sockaddr_in endCliente, InfoCliente regi
     if(listaClientes == NULL){
         printf(SISTEMA "Não há lista de clientes!\n");
 
-        insereListaClientes(registro, endCliente, listaClientes); //Insere cliente na lista.
+        Cliente * cliente = criaCliente(endCliente, registro); //Cria um cliente com as suas informações.
+        insereListaClientes(cliente, listaClientes); //Insere cliente na lista.
 
         printf("%s (%s): ", registro.nome, registro.user);
         printf(SUCESSO_CONEXAO_CLIENTE);
@@ -40,23 +41,19 @@ int conectarCliente(int rSocket, struct sockaddr_in endCliente, InfoCliente regi
         return 0;
     }
 
+    //Cria um cliente com as suas informações.
+    Cliente * cliente = criaCliente(endCliente, registro);
+
     //Insere o cliente na lista de clientes.
-    insereListaClientes(registro, endCliente, listaClientes);
+    insereListaClientes(cliente, listaClientes);
 
-    
-    char mensagem[TAM_MSG];
-    strcpy(mensagem, cores[0]);
-    strcat(mensagem, registro.user);
-    strcat(mensagem, " entrou no servidor!");
-    strcat(mensagem, RESET);
-    strcat(mensagem, "\n\0");
-    
+    char * mensagem = mensagemServidor(cliente, " entrou no servidor!", COR_CONECTADO);
+    if(mensagem != NULL){
+        enviaMensagemParaTodos(rSocket, mensagem, listaClientes);
+        printf(SISTEMA "%s", mensagem);
+        free(mensagem);
+    }
 
-    //Envia mensagem de conexão no servidor para todos os conectados, exceto ao recém conectado.
-    enviaMensagemParaOutros(rSocket, mensagem, endCliente, listaClientes);
-
-    printf(SISTEMA "%s (%s): ", registro.nome, registro.user);
-    printf(SUCESSO_CONEXAO_CLIENTE);
     return 0;
 }
 
@@ -108,7 +105,7 @@ void enviaMensagemParaOutros(int rSocket, char mensagem[TAM_MSG], struct sockadd
 
 /**
  * Envia mensagem para todos os clientes da lista, incluindo ao que enviou a mensagem.
- * @param rSocket feedback da conexão.
+ * @param r~Socket feedback da conexão.
  * @param mensagem mensagem a se enviar para os clientes conectados.
  * @param listaClientes lista de clientes conectados no servidor.
 */
@@ -215,10 +212,6 @@ int verificaExecutaFuncao(int rSocket, struct sockaddr_in mensageiro, char mensa
             j++;
         }
     }
-
-    printf(SISTEMA "FUNCAO: %s\n", funcao);
-    printf(SISTEMA "PARAMETRO 1: %s\n", param1);
-    printf(SISTEMA "PARAMETRO 2: %s\n", param2);
 
     //Verifica se a função é um sussurro: envia uma mensagem privada a um cliente.
     if(strcmp(funcao, SUSSURRO) == 0){

@@ -57,7 +57,6 @@ int main(){
     inet_ntop(AF_INET, &endServidor,ip,INET_ADDRSTRLEN);
     printf(AVISO"Socket esta online no IP %s e na porta %d!\n", ip, ntohs(endServidor.sin_port));
 
-
     while(1){
         bzero(mensagem, TAM_MSG);
 
@@ -77,22 +76,16 @@ int main(){
         //Se o cliente não está conectado, as mensagens que chegam são informações do usuário para conectá-lo.
         if(!clienteConectado(endMensageiro, listaClientes)){
             InfoCliente infoCliente = criaRegistroCliente(mensagem); //Cria o registro do cliente a partir da mensagem recebida.
-
             if(infoCliente.moderador == -1)
                 continue;
             
-            printf(SISTEMA "Dados do cliente: \n");
-            printf("\t\t NOME: %s\n", infoCliente.nome);
-            printf("\t\t USER: %s\n", infoCliente.user);
-            printf("\t\t MODERADOR: %d\n", infoCliente.moderador);
-            printf("\t\t COR: %d\n", infoCliente.cor);
+            imprimeRegistro(infoCliente); //Imprime as informações do registro do cliente.
             
             if(strcmp(infoCliente.user, MODERADOR1) == 0 || strcmp(infoCliente.user, MODERADOR2) == 0){
                 infoCliente.moderador = 1;
                 infoCliente.cor = COR_MOD;
             }
-            
-            Cliente * cliente = (Cliente * ) malloc(Cliente *);
+
             if(conectarCliente(rSocket, endMensageiro, infoCliente, listaClientes, (char**) cores)){
                 printf(AVISO "User %s conectado!\n", infoCliente.user);
 

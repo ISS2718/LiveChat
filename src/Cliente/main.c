@@ -31,8 +31,6 @@ int main(){
     bzero(servidor_ip, TAM_IP);
     bzero(usr_envia, TAM_NOME + TAM_USER + 1);
 
-    
-
     // Requisita nome do usuário
     printf(AMARELO"Digite seu nome real (tam_máx %d):\n"RESET, TAM_NOME - 1);
     while(fgets(cliente.nome, TAM_NOME, stdin) == NULL){
@@ -50,9 +48,9 @@ int main(){
     tirabarran(cliente.user);
 
     // Monta a String para envio do nome e usuário no padrão #nome#usuário. 
-    strcpy(usr_envia, CODIGO_REGISTRO);
+    strcpy(usr_envia, "#");
     strcat(usr_envia, cliente.nome);
-    strcat(usr_envia, CODIGO_REGISTRO);
+    strcat(usr_envia, "#");
     strcat(usr_envia, cliente.user);
     strcat(usr_envia, "\n\0");
 
