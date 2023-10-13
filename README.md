@@ -41,7 +41,7 @@ LiveChat é uma aplicação Servidor-Cliente de chat de "LiveStream" com comunic
          * [**5.3.1. Identificação dos clientes e moderadores.**](#531-identifica%C3%A7%C3%A3o-dos-clientes-e-moderadores)
          * [**5.3.2. Envio de mensagens aos clientes.**](#532-envio-de-mensagens-aos-clientes)
       * [**5.4. Identificação das funções.**](#54-identifica%C3%A7%C3%A3o-das-fun%C3%A7%C3%B5e)
-   * [**6. Resumo do Cliente.**](#6-resumo-do-clienter)
+   * [**6. Resumo do Cliente.**](#6-resumo-do-cliente)
       * [**6.1. Usuário**](#61-usu%C3%A1rio)
       * [**6.2. Socket**](#62-socket)
       * [**6.3. Primeira Mensagem**](#63-primeira-mensagem)
