@@ -47,7 +47,58 @@ LiveChat é uma aplicação Servidor-Cliente de chat de "LiveStream" com comunic
 
 ## **3. Instalação dos Pré-requisitos.**
 
-### **3.1.Ubuntu**
+### **3.1. Ubuntu.**
+
+### **3.1.1 GCC.**
+
+Para comkpilar e executar o LiveChat devemos ter o GCC. Primeiro, verifique se o gcc já não está instalado. Execute
+
+```
+$ gcc -v
+```
+
+Caso não haja, execute
+
+```
+$ sudo apt install build-essential
+```
+
+Se o gcc foi instalado com êxito, então ao executar ```$ gcc -v```, deve aparecer a última versão do gcc.
+Caso não esteja você pode forçar a instalação do gcc com
+
+```
+$ sudo apt install gcc
+```
+
+#### **3.1.2. GNU make.**
+
+Caso você tenha instalado o ```build-essential``` o GNU make, também conhecido como Makefile, provavelmente já está instalado. Para descobrir se realmente esté instalado, basta seguir um processo parecido ao do gcc. Execute
+
+```
+$ make -v
+```
+
+Caso não haja, execute
+
+```
+$ sudo apt install make
+```
+
+Se o make foi instalado com êxito, então ao executar ```$ make -v```, deve aparecer a última versão do make.
+
+### **3.2. Outras Distribuições Linux.**
+
+Para outras distribuições linux teste se não há o gcc e o make já instalado com
+
+```
+$ gcc -v
+```
+
+```
+$ make -v
+```
+
+Caso não tenha um, ou os dois, basta procurar por pacotes equivalentes ao do ubunto. Pois certamente existirá.
 
 ## **4. Guia de execução.**
 
