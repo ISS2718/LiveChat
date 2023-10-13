@@ -51,7 +51,58 @@ LiveChat é uma aplicação Servidor-Cliente de chat de "LiveStream" com comunic
 
 ## **4. Guia de execução.**
 
+### **4.X. Funções dos usuários.**
+
+**1. Sussurro**: um usuário pode enviar uma *mensagem* privada a outro *usuário*, executando a linha
+
+```
+/priv usuário mensagem
+```
+
+**2. Fechar cliente**: um usuário pode se desconectar do servidor, executando a linha
+
+```
+/quit
+```
+
+**3. Mostrar clientes**: um usuário pode obter uma lista com todos os clientes conectados, com indicação especial aos moderadores, executando a linha
+
+```
+/users
+```
+
+**4. Poder de moderador**: um *moderador* por dar poder de moderador a outro usuário, executando a linha
+
+```
+/mod usuario true
+```
+e, ainda, retirá-lo com
+```
+/mod usuario false
+```
+* **OBS**: essa função só pode ser executada por um moderador. Também não é possível dar poder de moderador a um usuário já moderador, ou retirar de um usuário que não é moderador.
+
+
+**5. Mutar**: um moderador pode mutar um outro usuário e impedir que suas mensagens sejam enviadas aos usuários conectados. Executa-se
+```
+/mute usuário true
+```
+Para desmutá-lo, executa-se
+```
+/mute usuário false
+```
+
+* **OBS**: essa função só pode ser executada por um moderador. Também não é possível mutar um usuário já mutado, ou desmutar um usuário já desmutado.
+
+**6. Fechar servidor**: um moderador pode fechar o servidor. Esse comando desconecta todos os outros usuários e finaliza o servidor. Executa-se:
+```
+/fservidor
+```
+* **OBS**: essa função só pode ser executada por um moderador.
+
 ## **5. Resumo do Servidor.**
+
+
 
 ## **6. Resumo do Cliente.**
 
