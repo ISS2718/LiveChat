@@ -1,10 +1,9 @@
 #include "cliente.h"
 
 void* enviar(void * arg) {
-     ParametrosPthreads * p = (ParametrosPthreads *) arg;
+    ParametrosPthreads * p = (ParametrosPthreads *) arg;
 
     char bufferEnviar[TAM_MSG];
-    bzero(bufferEnviar, TAM_MSG);
 
     while (1) {
         // Zera buffer para enviar nova mensagem
@@ -37,7 +36,7 @@ void* receber(void * arg) {
     ParametrosPthreads * p = (ParametrosPthreads *) arg;
 
     char bufferReceber[TAM_MSG];
-    bzero(bufferReceber, TAM_MSG);
+    
     int real_msg_tam;
     while (1) {
         bzero(bufferReceber, TAM_MSG);

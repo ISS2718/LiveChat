@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "cliente.h": "c"
+        "cliente.h": "c",
+        "unistd.h": "c",
+        "pthread.h": "c"
     }
 }

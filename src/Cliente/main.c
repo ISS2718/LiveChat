@@ -32,15 +32,15 @@ int main(){
     bzero(usr_envia, TAM_NOME + TAM_USER + 1);
 
     // Requisita nome do usuário
-    printf(AMARELO"Digite seu nome real (tam_máx %d):\n"RESET, TAM_NOME - 1);
+    printf(AMARELO "Digite seu nome real (tam_máx %d):\n"RESET, TAM_NOME - 1);
     while(fgets(cliente.nome, TAM_NOME, stdin) == NULL){
-        printf(ERRO"Digite novamente o seu nome\n");
+        printf(ERRO "Digite novamente o seu nome\n");
     }
 
     // Requisita nome de usuário.
-    printf(AMARELO"Digite seu usuário (tam_máx %d):\n"RESET, TAM_USER - 1);
+    printf(AMARELO "Digite seu usuário (tam_máx %d):\n"RESET, TAM_USER - 1);
     while(fgets(cliente.user, TAM_USER, stdin) == NULL){
-        printf(ERRO"Digite novamente o seu usuário\n");
+        printf(ERRO "Digite novamente o seu usuário\n");
     }
 
     // Trira o "\n" das Strings recebidas pelo fgets
@@ -57,7 +57,7 @@ int main(){
     strcat(usr_envia, "\n\0");
 
     // Requisita ip do servidor (hostname)
-    printf(AMARELO"Digite o ip do servidor (tam_máx %d):\n"RESET, TAM_IP - 1);
+    printf(AMARELO "Digite o ip do servidor (tam_máx %d):\n"RESET, TAM_IP - 1);
     while(!scanf("%s", servidor_ip)) {
         printf(ERRO"Digite novamente o seu usuário\n");
     }
@@ -66,13 +66,13 @@ int main(){
     struct hostent *servidor = gethostbyname(servidor_ip);
     if(servidor == NULL) {
         // Se não foi possível conseguir as informações do servidor pelo ip recebido, printa erro
-        printf(ERRO"Não foi possível obter as informações do servidor pelo ip recebido.\n");
+        printf(ERRO "Não foi possível obter as informações do servidor pelo ip recebido.\n");
         return 1;
     }
     // Se foi possível conseguir as informações do servidor pelo ip recebido, printa informações
     printf("\n");
-    printf(AMARELO"Nome Servidor:"RESET"%s\n", servidor->h_name);
-    printf(AMARELO"Endereço IP do Servidor:"RESET"%s\n", inet_ntoa((struct in_addr)*((struct in_addr *)servidor->h_addr)));
+    printf(AMARELO "Nome Servidor:"RESET"%s\n", servidor->h_name);
+    printf(AMARELO "Endereço IP do Servidor:"RESET"%s\n", inet_ntoa((struct in_addr)*((struct in_addr *)servidor->h_addr)));
     printf("\n");
 
 
@@ -80,7 +80,7 @@ int main(){
     int socket_c;
     if((socket_c = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
         close(socket_c);
-        printf(ERRO"Não foi possível criar o descritor do socket.\n");
+        printf(ERRO "Não foi possível criar o descritor do socket.\n");
         return 1;
     }
 
@@ -95,14 +95,14 @@ int main(){
 
     // Realizando a conexão com o servidor
     if(connect(socket_c, (struct sockaddr*) &socket_endereço, sizeof(struct sockaddr)) == -1) {
-        printf(ERRO"Não foi possível conetctar no servidor.\n");
+        printf(ERRO "Não foi possível conetctar no servidor.\n");
         close(socket_c);
         return 1;
     }
 
     // Enviando dados do usuário pro servidor utilizando o socket
     if(send(socket_c, usr_envia, strlen(usr_envia), 0) == -1) {
-        printf(ERRO"Fallha no envio do login!\n");
+        printf(ERRO "Fallha no envio do login!\n");
         close(socket_c);
         return 1;
     }
