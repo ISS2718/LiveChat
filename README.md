@@ -40,6 +40,8 @@ LiveChat é uma aplicação Servidor-Cliente de chat de "LiveStream" com comunic
 
 ## **1. Composição do projeto.**
 
+O LiveChat é composto de um Servidor e n-Clinetes. Em nosso servidor é recebido todas as mensagens, realizado o monitoramento de conexões e mensagens enviadas, além de, enviar a todos outros clientes. Os clientes são aqueles que enviarão as mensagens no chat e recebem as mensagens eviadas por todos os outros clientes.
+
 ## **2. Pré-Requisitos**
 
 * GCC;
